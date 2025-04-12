@@ -1,24 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function HistoryScreen() {
+  const router = useRouter();
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   // 📌 ดึงประวัติการยืมหนังสือ
   useEffect(() => {
     axios
-      .get(`${API_URL}/user/history`)
+      .get(`${API_URL}/user/me`)
+      .then(() => {
+        setIsLoggedIn(true);
+        return axios.get(`${API_URL}/user/history`);
+      })
       .then((response) => {
         setHistory(response.data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("❌ Error fetching history:", error);
+        console.log("❌ ยังไม่ล็อกอินหรือดึงข้อมูลล้มเหลว:", error.message);
+        setIsLoggedIn(false);
         setLoading(false);
       });
   }, []);
@@ -37,6 +52,18 @@ export default function HistoryScreen() {
       .catch((error) => console.error("❌ Error returning book:", error));
   };
 
+  // 📌 ยังไม่ล็อกอิน
+  if (!loading && isLoggedIn === false) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}>⚠️ กรุณาเข้าสู่ระบบก่อนดูประวัติ</Text>
+        <TouchableOpacity style={styles.loginButton} onPress={() => router.push("/login")}>
+          <Text style={styles.buttonText}>🔑 เข้าสู่ระบบ</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>📚 ประวัติการยืมหนังสือ</Text>
@@ -50,8 +77,14 @@ export default function HistoryScreen() {
           renderItem={({ item }) => (
             <View style={styles.historyContainer}>
               <Text style={styles.bookTitle}>📖 {item.bookTitle}</Text>
-              <Text>📅 วันที่ยืม: {new Date(item.borrowDate).toLocaleDateString()}</Text>
-              <Text>⏳ วันครบกำหนดคืน: {new Date(item.dueDate).toLocaleDateString()}</Text>
+              <Text>
+                📅 วันที่ยืม:{" "}
+                {new Date(item.borrowDate).toLocaleDateString("th-TH")}
+              </Text>
+              <Text>
+                ⏳ วันครบกำหนดคืน:{" "}
+                {new Date(item.dueDate).toLocaleDateString("th-TH")}
+              </Text>
               <Text style={{ color: item.returned ? "green" : "red" }}>
                 {item.returned ? "✅ คืนแล้ว" : "⏳ ยังไม่คืน"}
               </Text>
@@ -72,18 +105,19 @@ export default function HistoryScreen() {
   );
 }
 
-// 🎨 **Styles (CSS)**
+// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#C8E6B2",
     padding: 20,
+    justifyContent: "center",
   },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   historyContainer: {
     backgroundColor: "#f8f9fa",
@@ -108,8 +142,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: "center",
   },
+  loginButton: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: "center",
+  },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+    fontSize: 16,
   },
 });

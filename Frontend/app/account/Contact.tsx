@@ -1,43 +1,64 @@
 import React from "react";
-import { View, Text, StyleSheet, Linking, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Linking,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 
 export default function Contact() {
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>📞 ช่องทางติดต่อ</Text>
 
-      <Text style={styles.label}>อีเมล:</Text>
-      <Text style={styles.link} onPress={() => Linking.openURL("mailto:bewrockgame1@gmail.com")}>
-      bewrockgame1@gmail.com
+      <Text style={styles.label}>📧 อีเมล:</Text>
+      <Text
+        style={styles.link}
+        onPress={() => Linking.openURL("mailto:bewrockgame1@gmail.com")}
+      >
+        bewrockgame1@gmail.com
       </Text>
-      <Text style={styles.link} onPress={() => Linking.openURL("mailto:66110045@dpu.ac.th")}>
-      66110045@dpu.ac.th
+      <Text
+        style={styles.link}
+        onPress={() => Linking.openURL("mailto:66110045@dpu.ac.th")}
+      >
+        66110045@dpu.ac.th
       </Text>
 
-      <Text style={styles.label}>เบอร์โทร:</Text>
-      <Text style={styles.link} onPress={() => Linking.openURL("tel:0611747731")}>
+      <Text style={styles.label}>📱 เบอร์โทร:</Text>
+      <Text
+        style={styles.link}
+        onPress={() => Linking.openURL("tel:0611747731")}
+      >
         061-174-7731
       </Text>
 
-      <Text style={styles.label}>Facebook:</Text>
-      <Text style={styles.link} onPress={() => Linking.openURL("https://facebook.com/biwrescue1706")}>
-        facebook
+      <Text style={styles.label}>📘 Facebook:</Text>
+      <Text
+        style={styles.link}
+        onPress={() => Linking.openURL("https://facebook.com/biwrescue1706")}
+      >
+        facebook.com/biwrescue1706
       </Text>
 
-      <Text style={styles.label}>LINE ID:</Text>
-      <Text style={styles.link} onPress={() => Linking.openURL("https://line.me/ti/p/Fx7FhxeGKe")}>
-        Line
+      <Text style={styles.label}>💬 LINE:</Text>
+      <Text
+        style={styles.link}
+        onPress={() => Linking.openURL("https://line.me/ti/p/Fx7FhxeGKe")}
+      >
+        เพิ่มเพื่อนใน LINE
       </Text>
-    </View>
+      <Text style={styles.plainText}>ID: phuwanatza7</Text>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#C8E6B2",
   },
   header: {
     fontSize: 24,
@@ -48,14 +69,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     fontWeight: "bold",
-    marginTop: 15,
+    marginTop: 20,
   },
   link: {
     fontSize: 18,
     color: "blue",
     textDecorationLine: "underline",
+    marginTop: 5,
   },
-  text: {
+  plainText: {
     fontSize: 18,
+    marginTop: 5,
   },
 });

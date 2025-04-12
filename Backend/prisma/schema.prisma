@@ -22,9 +22,9 @@ model User {
   titleTH          String //คำนำหน้าไทย 
   firstNameTH      String //ชื่อไทย
   lastNameTH       String //นามสกุลไทย
-  titleEN          String //คำนำหน้าอังกฤษ
-  firstNameEN      String //ชื่ออังกฤษ
-  lastNameEN       String //นามสกุลอังกฤษ
+  titleEN          String? //คำนำหน้าอังกฤษ
+  firstNameEN      String? //ชื่ออังกฤษ
+  lastNameEN       String? //นามสกุลอังกฤษ
   birthDate        DateTime //วันเกิด
   registrationDate DateTime @default(now()) //วันสมัคร
   expirationDate   DateTime //วันหมดอายุบัตร

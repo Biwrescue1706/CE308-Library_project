@@ -50,15 +50,20 @@ export default function AccountScreen() {
         <ActivityIndicator size="large" color="tomato" />
       ) : (
         <>
+          <Text> </Text>
           <Text>📧 อีเมล: {user?.email}</Text>
+          <Text> </Text>
           <Text>🆔 รหัสสมาชิก: {user?.memberId}</Text>
+          <Text> </Text>
           <Text>👤 ชื่อ: {user?.FNameTH} {user?.LNameTH}</Text>
+          <Text> </Text>
           <Text>📞 เบอร์โทร: {user?.phone}</Text>
+          <Text> </Text>
           <Text>
             📅 วันสมัครสมาชิก:{" "}
             {new Date(user?.joinDate).toLocaleDateString()}
           </Text>
-
+          <Text> </Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("../account/inforpersonal")}
@@ -89,7 +94,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#C8E6B2",
     padding: 20,
     justifyContent: "center",
   },
