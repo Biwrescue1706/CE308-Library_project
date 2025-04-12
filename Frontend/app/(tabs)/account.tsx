@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { 
-  View, Text, TouchableOpacity, Button, ActivityIndicator, StyleSheet 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
-import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function AccountScreen() {
-  const navigation = useNavigation<BottomTabNavigationProp<any>>();
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,10 +33,11 @@ export default function AccountScreen() {
 
   // 📌 ออกจากระบบ
   const handleLogout = () => {
-    axios.post(`${API_URL}/auth/logout`)
+    axios
+      .post(`${API_URL}/auth/logout`)
       .then(() => {
         console.log("✅ Logout successful");
-        // 📌 อาจใช้ navigation.replace("/login") ถ้าต้องการไปหน้า Login
+        router.replace("./login"); // เปลี่ยนเส้นทางไปหน้า login
       })
       .catch((error) => console.error("❌ Error logging out:", error));
   };
@@ -50,19 +54,29 @@ export default function AccountScreen() {
           <Text>🆔 รหัสสมาชิก: {user?.memberId}</Text>
           <Text>👤 ชื่อ: {user?.FNameTH} {user?.LNameTH}</Text>
           <Text>📞 เบอร์โทร: {user?.phone}</Text>
-          <Text>📅 วันสมัครสมาชิก: {new Date(user?.joinDate).toLocaleDateString()}</Text>
+          <Text>
+            📅 วันสมัครสมาชิก:{" "}
+            {new Date(user?.joinDate).toLocaleDateString()}
+          </Text>
 
-          {/* ปุ่มไปยังหน้าอื่นๆ */}
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Inforpersonal")}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("../account/inforpersonal")}
+          >
             <Text style={styles.buttonText}>ข้อมูลส่วนตัว</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Contact")}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("../account/contact")}
+          >
             <Text style={styles.buttonText}>ช่องทางติดต่อ</Text>
           </TouchableOpacity>
 
-          {/* ปุ่มออกจากระบบ */}
-          <TouchableOpacity style={[styles.button, styles.logoutButton]} onPress={handleLogout}>
+          <TouchableOpacity
+            style={[styles.button, styles.logoutButton]}
+            onPress={handleLogout}
+          >
             <Text style={styles.buttonText}>ออกจากระบบ</Text>
           </TouchableOpacity>
         </>
@@ -71,7 +85,6 @@ export default function AccountScreen() {
   );
 }
 
-// 🎨 **Styles (CSS)**
 const styles = StyleSheet.create({
   container: {
     flex: 1,
