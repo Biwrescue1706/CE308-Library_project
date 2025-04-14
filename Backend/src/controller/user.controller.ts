@@ -1,58 +1,31 @@
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+import { Request, Response } from "express";
+import * as UserService from "../service/user.service";
+import { z } from "zod";
 
-// 📌 ดึงข้อมูลผู้ใช้ทั้งหมด
-export const getAllUsers = async (page: number = 1, pageSize: number = 10) => {
-  const skip = (page - 1) * pageSize;
-  const [users, total] = await Promise.all([
-    prisma.user.findMany({
-      skip,
-      take: pageSize,
-      include: { address: true },
-    }),
-    prisma.user.count(),
-  ]);
+// 📌 Zod schema สำหรับ validate ข้อมูลผู้ใช
+const userSchema = z.object({
+  email: z.string().email("อีเมลไม่ถูกต้อง"),
+  memberId: z.string().min(1, "กรุณากรอกรหัสสมาชิก"),
+  username: z.string().min(3, "ชื่อผู้ใช้งานต้องมีอย่างน้อย 3 ตัวอักษร"),
+  password: z.string().min(6, "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"),
+  titleTH: z.string(),
+  firstNameTH: z.string(),
+  lastNameTH: z.string(),
+  titleEN: z.string().optional(),
+  firstNameEN: z.string().optional(),
+  lastNameEN: z.string().optional(),
+  birthDate: z.coerce.date({ required_error: "กรุณาระบุวันเกิด" }),
+  phone: z.string().min(9, "เบอร์โทรศัพท์ไม่ถูกต้อง"),
+  role: z.enum(["admin", "user"]).default("user"),
+});
 
-  return {
-    users,
-    total,
-    currentPage: page,
-    totalPages: Math.ceil(total / pageSize),
-  };
-};
-
-// 📌 ดึงข้อมูลผู้ใช้ตาม ID
-export const getUserById = async (id: string) => {
-  return await prisma.user.findUnique({
-    where: { id },
-    include: { address: true },
-  });
-};
-
-// 📌 ดึงข้อมูลผู้ใช้ตาม username (ใช้สำหรับ login)
-export const getUserByUsername = async (username: string) => {
-  return await prisma.user.findUnique({
-    where: { username },
-  });
-};
-
-// 📌 สร้างผู้ใช้ใหม่
-export const createUser = async (data: any) => {
-  return await prisma.user.create({ data });
-};
-
-// 📌 อัปเดตข้อมูลผู้ใช้
-export const updateUser = async (id: string, data: any) => {
-  return await prisma.user.update({
-    where: { id },
-    data,
-  });
-};
-
-// 📌 ลบผู้ใช้
-export const deleteUser = async (id: string) => {
-  return await prisma.user.delete({
-    where: { id },
-  });
+// ✅ สมัครสมาชิก
+export const register = async (req: Request, res: Response) => {
+  try {
+    const newUser = await UserService.createUser(req.body);
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการสมัครสมาชิก" });
+  }
 };
