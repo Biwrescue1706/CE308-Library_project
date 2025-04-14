@@ -1,90 +1,58 @@
-import { Request, Response } from "express";
-import * as UserService from "../service/user.service";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 
-// 🔐 กำหนด SECRET KEY สำหรับ JWT
-const SECRET_KEY = process.env.JWT_SECRET || "supersecretkey";
+const prisma = new PrismaClient();
 
-// 📌 ดึงผู้ใช้ทั้งหมด (admin เท่านั้น)
-export const getUsers = async (_req: Request, res: Response) => {
-  try {
-    const users = await UserService.getAllUsers();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้" });
-  }
+// 📌 ดึงข้อมูลผู้ใช้ทั้งหมด
+export const getAllUsers = async (page: number = 1, pageSize: number = 10) => {
+  const skip = (page - 1) * pageSize;
+  const [users, total] = await Promise.all([
+    prisma.user.findMany({
+      skip,
+      take: pageSize,
+      include: { address: true },
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    users,
+    total,
+    currentPage: page,
+    totalPages: Math.ceil(total / pageSize),
+  };
 };
 
-// 📌 ดึงผู้ใช้ตาม ID (admin หรือเจ้าของข้อมูล)
-export const getUser = async (req: Request, res: Response) => {
-  try {
-    const user = await UserService.getUserById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ error: "ไม่พบผู้ใช้" });
-    }
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้" });
-  }
+// 📌 ดึงข้อมูลผู้ใช้ตาม ID
+export const getUserById = async (id: string) => {
+  return await prisma.user.findUnique({
+    where: { id },
+    include: { address: true },
+  });
 };
 
-// 📌 สมัครผู้ใช้ใหม่ (hash password ก่อนบันทึก)
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const { password, ...restData } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await UserService.createUser({
-      ...restData,
-      password: hashedPassword,
-    });
-    res.status(201).json(newUser);
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการสร้างผู้ใช้" });
-  }
+// 📌 ดึงข้อมูลผู้ใช้ตาม username (ใช้สำหรับ login)
+export const getUserByUsername = async (username: string) => {
+  return await prisma.user.findUnique({
+    where: { username },
+  });
 };
 
-// 📌 แก้ไขข้อมูลผู้ใช้ (admin หรือเจ้าของข้อมูล)
-export const updateUser = async (req: Request, res: Response) => {
-  try {
-    const updatedUser = await UserService.updateUser(req.params.id, req.body);
-    res.json(updatedUser);
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้" });
-  }
+// 📌 สร้างผู้ใช้ใหม่
+export const createUser = async (data: any) => {
+  return await prisma.user.create({ data });
 };
 
-// 📌 ลบผู้ใช้ (admin เท่านั้น)
-export const deleteUser = async (req: Request, res: Response) => {
-  try {
-    await UserService.deleteUser(req.params.id);
-    res.json({ message: "ลบผู้ใช้สำเร็จ" });
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการลบผู้ใช้" });
-  }
+// 📌 อัปเดตข้อมูลผู้ใช้
+export const updateUser = async (id: string, data: any) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+  });
 };
 
-// 📌 เข้าสู่ระบบ (login) และออก JWT token
-export const loginUser = async (req: Request, res: Response) => {
-  try {
-    const { username, password } = req.body;
-    const user = await UserService.getUserByUsername(username);
-
-    if (!user) {
-      return res.status(401).json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
-    }
-
-    const token = jwt.sign({ userId: user.id, role: user.role }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
-
-    res.json({ token, user });
-  } catch (error) {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" });
-  }
+// 📌 ลบผู้ใช้
+export const deleteUser = async (id: string) => {
+  return await prisma.user.delete({
+    where: { id },
+  });
 };
