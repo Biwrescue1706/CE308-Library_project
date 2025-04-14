@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // 📌 กำหนดเส้นทาง API
-app.use("/api/users", userRoutes);
+app.use("/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/books", bookRoutes);
 

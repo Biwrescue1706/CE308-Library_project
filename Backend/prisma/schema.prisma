@@ -27,7 +27,6 @@ model User {
   lastNameEN       String? //นามสกุลอังกฤษ
   birthDate        DateTime //วันเกิด
   phone            String //โทรศัพท์ 
-  registrationDate DateTime @default(now()) //วันสมัคร
   role             String // เช่น admin, user 
   houseNumber      String? //บ้านเลขที่
   villageNo        String? //หมู่
@@ -37,6 +36,7 @@ model User {
   district         String? // อำเภอ
   province         String? // จังหวัด
   postalCode       String? // รหัสไปรษณีย์  
+  registrationDate DateTime @default(now()) //วันสมัคร
   createdAt        DateTime @default(now())
   updateAt         DateTime @updatedAt
   loans            Loan[]

@@ -12,31 +12,21 @@ CREATE TABLE "User" (
     "firstNameEN" TEXT,
     "lastNameEN" TEXT,
     "birthDate" TIMESTAMP(3) NOT NULL,
-    "registrationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "expirationDate" TIMESTAMP(3) NOT NULL,
-    "role" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "houseNumber" TEXT,
+    "villageNo" TEXT,
+    "alley" TEXT,
+    "street" TEXT,
+    "subdistrict" TEXT,
+    "district" TEXT,
+    "province" TEXT,
+    "postalCode" TEXT,
+    "registrationDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updateAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Address" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "houseNumber" TEXT NOT NULL,
-    "villageNo" TEXT NOT NULL,
-    "alley" TEXT NOT NULL,
-    "subdistrict" TEXT NOT NULL,
-    "district" TEXT NOT NULL,
-    "province" TEXT NOT NULL,
-    "postalCode" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updateAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Address_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -89,15 +79,6 @@ CREATE UNIQUE INDEX "User_memberId_key" ON "User"("memberId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Address_userId_key" ON "Address"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Cart_userId_bookId_key" ON "Cart"("userId", "bookId");
-
--- AddForeignKey
-ALTER TABLE "Address" ADD CONSTRAINT "Address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Book" ADD CONSTRAINT "Book_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
