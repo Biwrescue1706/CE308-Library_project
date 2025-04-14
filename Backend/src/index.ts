@@ -19,10 +19,10 @@ app.use(express.json());
 // 📌 กำหนดเส้นทาง API
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/books", bookRoutes);
+app.use("/books", bookRoutes);
 
 // ✅ แสดงข้อความเมื่อเปิดเซิร์ฟเวอร์
-app.get("", (_req, res) => {
+app.get("/", (_req, res) => {
     res.send("📚 Library API is running...");
 });
 

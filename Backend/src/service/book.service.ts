@@ -6,17 +6,33 @@ export const getAllBooks = async () => {
 }
 
 export const getBookById = async (id: string) => {
-    return await prisma.book.findUnique( { where: {id} } );
+    return await prisma.book.findUnique({ 
+        where: { id } ,
+    });
 }
 
 export const createBook = async (data: any) => {
-    return await prisma.book.create( {data} );
-}
+    const { createdById, ...bookData } = data;
+    return await prisma.book.create({
+      data: {
+        ...bookData,
+        createdBy: { connect: { id: createdById } },
+      },
+    });
+  };
 
-export const updateBook = async (id: string, data: any) => {
-    return await prisma.book.update({ where:  {id} , data });
-}
+  export const updateBook = async (id: string, data: any) => {
+    const { updatedById, ...bookData } = data;
+    return await prisma.book.update({
+      where: { id },
+      data: {
+        ...bookData,
+        ...(updatedById && { updatedBy: { connect: { id: updatedById } } }),
+      },
+    });
+  };
+  
 
 export const deleteBook = async (id: string) => {
-    return await prisma.book.delete({ where: {id} });
+    return await prisma.book.delete({ where: { id } });
 }

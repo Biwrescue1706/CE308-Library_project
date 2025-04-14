@@ -3,11 +3,11 @@ import * as BookController from "../controller/book.controller";
 
 const router = express.Router();
 
-// ✅ เส้นทางค้นหาต้องมาก่อน `/books/:id`
-router.get("/", BookController.getBooks);
-router.get("/:id", BookController.getBook);
-router.post("/", BookController.createBook);
-router.put("/:id", BookController.updateBook);
-router.delete("/:id", BookController.deleteBook);
+// 📚 Routes สำหรับหนังสือ
+router.get("/getAllBooks", BookController.getBooks);         // ดึงหนังสือทั้งหมด
+router.get("/getBooks/:id", BookController.getBook);       // ดึงหนังสือตาม ID
+router.post("/createBooks", BookController.createBook);      // เพิ่มหนังสือ
+router.put("/editBooks/:id", BookController.updateBook);    // แก้ไขหนังสือ
+router.delete("/deleteBooks/:id", BookController.deleteBook); // ลบหนังสือ
 
 export default router;
