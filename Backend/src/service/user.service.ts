@@ -3,10 +3,10 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-// ✅ สร้างผู้ใช้ใหม่
+// ✅ สร้างผู้ใช้ใหม่ (เข้ารหัสรหัสผ่านก่อนบันทึก)
 export const createUser = async (data: any) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  return prisma.user.create({
+  return await prisma.user.create({
     data: {
       ...data,
       password: hashedPassword,
@@ -14,9 +14,17 @@ export const createUser = async (data: any) => {
   });
 };
 
-// ✅ เข้าสู่ระบบ
-export const loginUser = async (username: string, password: string) => {
-  const user = await prisma.user.findUnique({ where: { username } });
+// ✅ เข้าสู่ระบบด้วย username หรือ email
+export const loginUserByUsernameOrEmail = async (usernameOrEmail: string, password: string) => {
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { username: usernameOrEmail },
+        { email: usernameOrEmail }
+      ]
+    }
+  });
+
   if (!user) return null;
 
   const isMatch = await bcrypt.compare(password, user.password);

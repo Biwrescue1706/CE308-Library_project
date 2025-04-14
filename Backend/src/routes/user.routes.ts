@@ -7,13 +7,13 @@ const router = express.Router();
 // ✅ สมัครสมาชิก
 router.post("/register", UserController.register);
 
-// ✅ เข้าสู่ระบบ
+// ✅ เข้าสู่ระบบด้วย username หรือ email
 router.post("/login", UserController.login);
 
-// ✅ อัปเดตข้อมูลผู้ใช้ (ส่ง :username)
+// ✅ อัปเดตข้อมูลผู้ใช้ (ใช้ username เป็น param)
 router.put("/update/:username", UserController.updateProfile);
 
-// ✅ ลบผู้ใช้ (ส่ง :username)
+// ✅ ลบผู้ใช้
 router.delete("/delete/:username", UserController.deleteUser);
 
 export default router;

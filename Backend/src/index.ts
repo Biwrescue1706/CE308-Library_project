@@ -17,9 +17,9 @@ app.use(cors());
 app.use(express.json());
 
 // 📌 กำหนดเส้นทาง API
-app.use("/users", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/books", bookRoutes);
+app.use("/api/books", bookRoutes);
 
 // ✅ แสดงข้อความเมื่อเปิดเซิร์ฟเวอร์
 app.get("/", (_req, res) => {
@@ -28,5 +28,5 @@ app.get("/", (_req, res) => {
 
 
 app.listen(PORT, '0.0.0.0' ,() =>{
-console.log(` Server running on http://0.0.0.0:${PORT}`);
+console.log(`Server running at http://localhost:${PORT}}`);
 });

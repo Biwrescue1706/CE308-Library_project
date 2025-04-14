@@ -1,17 +1,15 @@
-
 import { Request, Response } from "express";
 import * as UserService from "../service/user.service";
 import { z, ZodError } from "zod";
 
-// 📌 Zod schema สำหรับ validate ข้อมูลผู้ใช
+// 📌 Zod schema สำหรับ validate ข้อมูลผู้ใช้
 const userSchema = z.object({
   email: z.string().email("รูปแบบอีเมลไม่ถูกต้อง"),
-  memberId: z.string().min(1, "กรุณาระบุรหัสสมาชิก"),
   username: z.string().min(3, "ชื่อผู้ใช้งานต้องมีอย่างน้อย 3 ตัวอักษร"),
   password: z.string().min(6, "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"),
-  titleTH: z.string().min(1, "กรุณาระบุคำนำหน้า (ไทย)"),
-  firstNameTH: z.string().min(1, "กรุณาระบุชื่อ (ไทย)"),
-  lastNameTH: z.string().min(1, "กรุณาระบุนามสกุล (ไทย)"),
+  titleTH: z.string().min(1),
+  firstNameTH: z.string().min(1),
+  lastNameTH: z.string().min(1),
   titleEN: z.string().optional(),
   firstNameEN: z.string().optional(),
   lastNameEN: z.string().optional(),
@@ -28,37 +26,44 @@ const userSchema = z.object({
   role: z.enum(["admin", "user"]).default("user"),
 });
 
+// 📌 สร้าง memberId ฟอร์แมต MEM-xxxx-xxxx-xxxx
+function generateMemberId(): string {
+  const part = () => Math.floor(1000 + Math.random() * 9000).toString();
+  return `MEM-${part()}-${part()}-${part()}`;
+}
+
 // ✅ สมัครสมาชิก
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const validated = userSchema.parse({
-      ...req.body,
-      role: "user", // กำหนด role เป็น user เสมอ
-    });
+    const validated = userSchema.omit({ role: true }).parse(req.body);
 
     const newUser = await UserService.createUser({
       ...validated,
+      role: "user", // 🔐 บังคับ role เป็น user
+      memberId: generateMemberId(),
       registrationDate: new Date(),
     });
 
     res.status(201).json(newUser);
   } catch (err) {
     if (err instanceof ZodError) {
-      return res.status(400).json({ error: err.errors });
+      res.status(400).json({ error: err.errors });
+    } else {
+      console.error(err);
+      res.status(500).json({ error: "เกิดข้อผิดพลาดในการสมัครสมาชิก" });
     }
-    console.error(err);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการสมัครสมาชิก" });
   }
 };
 
-// ✅ เข้าสู่ระบบ
-export const login = async (req: Request, res: Response) => {
+// ✅ เข้าสู่ระบบด้วย username หรือ email
+export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { username, password } = req.body;
-    const user = await UserService.loginUser(username, password);
+    const user = await UserService.loginUserByUsernameOrEmail(username, password);
 
     if (!user) {
-      return res.status(401).json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
+      res.status(401).json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
+      return;
     }
 
     res.json({ user, role: user.role });
@@ -68,7 +73,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-// ✅ อัปเดตข้อมูลผู้ใช้ (อิงจาก username)
+// ✅ อัปเดตข้อมูลผู้ใช้
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const updatedUser = await UserService.updateUserByUsername(req.params.username, req.body);
