@@ -1,6 +1,6 @@
 import express from "express";
 import * as AuthController from "../controller/auth.controller";
-import { authenticateToken } from "../middleware/auth.middleware"; // ✅ ใช้ `{}`
+import { authenticate  } from "../middleware/auth.middleware"; // ✅ ใช้ `{}`
 
 const router = express.Router();
 

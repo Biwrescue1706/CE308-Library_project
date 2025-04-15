@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import * as BookService from "../service/book.service";
+import { prisma } from "../utils/prisma";
 import { z, ZodError } from "zod";
+
+
 
 // 📌 Zod schema สำหรับ validate ข้อมูลหนังสือ
 const BookSchema = z.object({
@@ -10,7 +13,7 @@ const BookSchema = z.object({
   category: z.string().min(1, "หมวดหมู่เป็นสิ่งจำเป็น"),
   totalCopies: z.number().int().positive("จำนวนสำเนาทั้งหมดต้องเป็นค่าบวก"),
   availableCopies: z.number().optional(),
-  createdById: z.string().uuid({ message: "createdById ต้องเป็น UUID ที่ถูกต้อง" }),
+  createdById: z.string(),
   updatedById: z.string().uuid({ message: "updatedById ต้องเป็น UUID ที่ถูกต้อง" }).optional()
 });
 
@@ -43,9 +46,20 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
   try {
     const validated = BookSchema.parse(req.body);
 
+    // 👉 ตรวจสอบว่า user ที่ส่งมาเป็น admin หรือไม่
+    const user = await prisma.user.findUnique({
+      where: { id: validated.createdById },
+    });
+
+    if (!user || user.role !== "admin") {
+      res.status(403).json({ message: "คุณไม่มีสิทธิ์เพิ่มหนังสือ" });
+      return;
+    }
+
     const bookData = {
       ...validated,
       availableCopies: validated.availableCopies ?? validated.totalCopies,
+      createdById: validated.createdById,
     };
 
     const book = await BookService.createBook(bookData);

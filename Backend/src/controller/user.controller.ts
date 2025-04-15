@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import * as UserService from "../service/user.service";
 import { z, ZodError } from "zod";
+import { prisma } from "../utils/prisma";
+import { generateToken } from "../utils/jwt";
 
 // 📌 Zod schema สำหรับ validate ข้อมูลผู้ใช้
 const userSchema = z.object({
@@ -65,7 +67,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.json({ user, role: user.role });
+    // ✅ สร้าง token จากข้อมูลผู้ใช้ (แนะนำให้ใส่แค่ id, username, role)
+    const token = generateToken({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+    });
+
+    res.json({
+      message: "เข้าสู่ระบบสำเร็จ",
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" });

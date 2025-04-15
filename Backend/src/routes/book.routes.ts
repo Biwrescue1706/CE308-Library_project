@@ -1,13 +1,19 @@
 import express from "express";
 import * as BookController from "../controller/book.controller";
+import {authenticate} from "../middleware/auth.middleware";
 
 const router = express.Router();
 
 // 📚 Routes สำหรับหนังสือ
-router.get("/getAllBooks", BookController.getBooks);         // ดึงหนังสือทั้งหมด
-router.get("/getBooks/:id", BookController.getBook);       // ดึงหนังสือตาม ID
-router.post("/createBooks", BookController.createBook);      // เพิ่มหนังสือ
-router.put("/editBooks/:id", BookController.updateBook);    // แก้ไขหนังสือ
-router.delete("/deleteBooks/:id", BookController.deleteBook); // ลบหนังสือ
+// ดึงหนังสือทั้งหมด
+router.get("/getAllBooks", BookController.getBooks);         
+// ดึงหนังสือตาม ID
+router.get("/getBooks/:id", BookController.getBook);       
+// เพิ่มหนังสือ
+router.post("/create", authenticate, BookController.createBook);    
+// แก้ไขหนังสือ 
+router.put("/editBooks/:id", BookController.updateBook); 
+// ลบหนังสือ   
+router.delete("/deleteBooks/:id", BookController.deleteBook); 
 
 export default router;

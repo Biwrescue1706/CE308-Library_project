@@ -1,34 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../utils/jwt";
 
-const SECRET_KEY = process.env.JWT_SECRET || "supersecretkey";
+export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+  const authHeader = req.headers.authorization;
 
-interface JwtPayload {
-  userId: string;
-  role: string;
-}
-
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: JwtPayload;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
-}
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Access Denied: No Token Provided" });
+  const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY) as JwtPayload;
-    req.user = decoded;
+    const user = verifyToken(token);
+    (req as any).user = user;
     next();
-  } catch (err) {
-    return res.status(403).json({ error: "Invalid or Expired Token" });
+  } catch {
+    res.status(403).json({ error: "Invalid token" });
   }
-};
-
-export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role === "admin") return next();
-  return res.status(403).json({ error: "Forbidden: Admin only" });
 };
