@@ -35,11 +35,10 @@ function generateMemberId(): string {
 // ✅ สมัครสมาชิก
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const validated = userSchema.omit({ role: true }).parse(req.body);
+    const validated = userSchema.parse(req.body);
 
     const newUser = await UserService.createUser({
       ...validated,
-      role: "user", // 🔐 บังคับ role เป็น user
       memberId: generateMemberId(),
       registrationDate: new Date(),
     });
