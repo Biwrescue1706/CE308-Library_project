@@ -12,8 +12,8 @@ router.get("/getBooks/:id", BookController.getBook);
 // เพิ่มหนังสือ
 router.post("/create", authenticate, BookController.createBook);    
 // แก้ไขหนังสือ 
-router.put("/editBooks/:id", BookController.updateBook); 
+router.put("/editBooks/:id" , authenticate , BookController.updateBook); 
 // ลบหนังสือ   
-router.delete("/deleteBooks/:id", BookController.deleteBook); 
+router.delete("/deleteBooks/:id", authenticate , BookController.deleteBook); 
 
 export default router;

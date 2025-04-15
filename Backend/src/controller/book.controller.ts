@@ -13,15 +13,14 @@ const BookSchema = z.object({
   category: z.string().min(1, "หมวดหมู่เป็นสิ่งจำเป็น"),
   totalCopies: z.number().int().positive("จำนวนสำเนาทั้งหมดต้องเป็นค่าบวก"),
   availableCopies: z.number().optional(),
-  createdById: z.string(),
-  updatedById: z.string().uuid({ message: "updatedById ต้องเป็น UUID ที่ถูกต้อง" }).optional()
 });
 
 // 📚 ดึงหนังสือทั้งหมด
-export const getBooks = async (_req: Request, res: Response): Promise<void> => {
+export const getBooks = async (req: Request, res: Response): Promise<void> => {
   try {
     const books = await BookService.getAllBooks();
     res.json(books);
+    return
   } catch {
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงหนังสือทั้งหมด" });
   }
@@ -31,9 +30,10 @@ export const getBooks = async (_req: Request, res: Response): Promise<void> => {
 export const getBook = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const book = await BookService.getBookById(id);
+    const book = await prisma.book.findUnique({ where: { id } });
     if (!book) {
       res.status(404).json({ error: "ไม่พบหนังสือ" });
+      return
     }
     res.json(book);
   } catch {
@@ -44,22 +44,19 @@ export const getBook = async (req: Request, res: Response): Promise<void> => {
 // ➕ เพิ่มหนังสือใหม่
 export const createBook = async (req: Request, res: Response): Promise<void> => {
   try {
-    const validated = BookSchema.parse(req.body);
-
-    // 👉 ตรวจสอบว่า user ที่ส่งมาเป็น admin หรือไม่
-    const user = await prisma.user.findUnique({
-      where: { id: validated.createdById },
-    });
+    const user = (req as any).user; // ✅ มาจาก token ที่ middleware แปะไว้
 
     if (!user || user.role !== "admin") {
       res.status(403).json({ message: "คุณไม่มีสิทธิ์เพิ่มหนังสือ" });
-      return;
+      return
     }
+
+    const validated = BookSchema.parse(req.body);
 
     const bookData = {
       ...validated,
       availableCopies: validated.availableCopies ?? validated.totalCopies,
-      createdById: validated.createdById,
+      createdById: user.id, // ✅ ดึงจาก token แทน
     };
 
     const book = await BookService.createBook(bookData);
@@ -68,19 +65,28 @@ export const createBook = async (req: Request, res: Response): Promise<void> => 
     if (error instanceof ZodError) {
       res.status(400).json({ error: error.errors });
     } else {
+      console.error(error);
       res.status(500).json({ error: "เกิดข้อผิดพลาดในการเพิ่มหนังสือ" });
     }
   }
 };
 
+
 // ✏️ อัปเดตหนังสือ
 export const updateBook = async (req: Request, res: Response): Promise<void> => {
   try {
+    const user = (req as any).user;
+
+    if (!user || user.role !== "admin") {
+      res.status(403).json({ message: "คุณไม่มีสิทธิ์แก้ไขหนังสือ" });
+      return
+    }
+
     const validated = BookSchema.partial().parse(req.body);
 
     const bookData = {
       ...validated,
-      ...(validated.updatedById && { updatedById: validated.updatedById }),
+      updatedById: user.id, // ✅ ดึงจาก token แทน
     };
 
     const book = await BookService.updateBook(req.params.id, bookData);
@@ -94,10 +100,18 @@ export const updateBook = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
+
 // ❌ ลบหนังสือ
 export const deleteBook = async (req: Request, res: Response): Promise<void> => {
   try {
     await BookService.deleteBook(req.params.id);
+
+    const user = (req as any).user;
+    if (!user || user.role !== "admin") {
+      res.status(403).json({ message: "คุณไม่มีสิทธิ์ลบหนังสือ" });
+      return;
+    }
+
     res.json({ message: "ลบหนังสือเรียบร้อยแล้ว" });
   } catch {
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการลบหนังสือ" });

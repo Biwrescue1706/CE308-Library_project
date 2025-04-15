@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 
 // 📌 Import Routes
 import userRoutes from "./routes/user.routes";
-import authRoutes from "./routes/auth.routes";
 import bookRoutes from "./routes/book.routes";
 // import loanRoutes from "./routes/loan.routes";
 
@@ -20,7 +19,6 @@ app.use(express.json());
 
 // 📌 กำหนดเส้นทาง API
 app.use("/api/users", userRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 
 // ✅ แสดงข้อความเมื่อเปิดเซิร์ฟเวอร์

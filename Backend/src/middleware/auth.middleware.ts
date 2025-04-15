@@ -1,21 +1,21 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
 
+// Middleware: ตรวจสอบ token ที่อยู่ใน cookie
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies?.token;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    res.status(401).json({ error: "Unauthorized" });
+  if (!token) {
+    res.status(401).json({ error: "คุณยังไม่ได้เข้าสู่ระบบ" });
     return;
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
     const user = verifyToken(token);
-    (req as any).user = user;
+    (req as any).user = user; // ✅ inject user เข้า req
     next();
-  } catch {
-    res.status(403).json({ error: "Invalid token" });
+  } catch (err) {
+    console.error("❌ Token verification failed:", err);
+    res.status(403).json({ error: "Token ไม่ถูกต้องหรือหมดอายุ" });
   }
 };

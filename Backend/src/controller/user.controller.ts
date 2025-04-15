@@ -67,27 +67,28 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ✅ สร้าง token จากข้อมูลผู้ใช้ (แนะนำให้ใส่แค่ id, username, role)
     const token = generateToken({
       id: user.id,
       username: user.username,
       role: user.role,
     });
 
-    res.json({
-      message: "เข้าสู่ระบบสำเร็จ",
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      },
+    // ✅ ใส่ token ใน cookie
+    res.cookie("token", token, {
+      httpOnly: true,       // ปลอดภัยจาก XSS
+      secure: false,        // ✅ เปลี่ยนเป็น true ถ้าใช้ https
+      sameSite: "lax",      // ป้องกัน CSRF ระดับหนึ่ง
+      maxAge: 30 * 60 * 1000 // 30 นาที    
+
     });
+
+    res.json({ message: "เข้าสู่ระบบสำเร็จ", user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการเข้าสู่ระบบ" });
   }
 };
+
 
 // ✅ อัปเดตข้อมูลผู้ใช้
 export const updateProfile = async (req: Request, res: Response) => {
@@ -109,4 +110,15 @@ export const deleteUser = async (req: Request, res: Response) => {
     console.error(err);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการลบผู้ใช้" });
   }
+};
+
+
+export const logout = (req: Request, res: Response) => {
+  res.clearCookie("token");
+  res.json({ message: "ออกจากระบบเรียบร้อย" });
+};
+
+export const getMe = (req: Request, res: Response) => {
+  const user = (req as any).user;
+  res.json({ user });
 };

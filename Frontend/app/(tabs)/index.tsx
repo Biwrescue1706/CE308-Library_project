@@ -23,7 +23,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       axios
-        .get(`${API_URL}/books`)
+        .get(`${API_URL}/books/getAllBooks`)
         .then((response) => setBooks(response.data))
         .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการดึงหนังสือ :", error));
     }, [])
@@ -32,7 +32,7 @@ export default function HomeScreen() {
   // 📌 ลบหนังสือ
   const handleDelete = (id: string) => {
     axios
-      .delete(`${API_URL}/books/${id}`)
+      .delete(`${API_URL}/deleteBooks/${id}`)
       .then(() => {
         setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
       })
@@ -60,7 +60,7 @@ export default function HomeScreen() {
           availableCopies: book.availableCopies - 1,
         };
 
-        await axios.put(`${API_URL}/books/${book.id}`, updatedBook);
+        await axios.put(`${API_URL}/books/getBooks/${book.id}`, updatedBook);
         setBooks((prevBooks) =>
           prevBooks.map((b) => (b.id === book.id ? updatedBook : b))
         );
@@ -82,7 +82,7 @@ export default function HomeScreen() {
         availableCopies: selectedBook.availableCopies,
       };
 
-      axios.put(`${API_URL}/books/${selectedBook.id}`, updatedBook)
+      axios.put(`${API_URL}/books/editBooks/${selectedBook.id}`, updatedBook)
         .then(() => {
           closeModal();
           setBooks((prevBooks) =>

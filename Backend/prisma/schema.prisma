@@ -27,7 +27,7 @@ model User {
   lastNameEN       String? //นามสกุลอังกฤษ
   birthDate        DateTime //วันเกิด
   phone            String //โทรศัพท์ 
-  role             String // เช่น admin, user 
+  role             String @default("user") // เช่น admin, user 
   houseNumber      String? //บ้านเลขที่
   villageNo        String? //หมู่
   alley            String? //ซอย
