@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { login } from "./utils/api"; // ✅ import จากไฟล์รวม api
+import { login } from "../utils/api"; // ✅ import จากไฟล์รวม api
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function LoginScreen() {
       if (user.role === "admin") {
         router.replace("/addBooks");
       } else {
-        router.replace("/");
+        router.replace("/index");
       }
     } catch (error: any) {
       console.error("❌ Login error:", error.response?.data || error.message);
@@ -52,10 +52,10 @@ export default function LoginScreen() {
       <View style={styles.loginBox}>
         <Text style={styles.header}>🔐 เข้าสู่ระบบ</Text>
 
-        <Text style={styles.label}>ชื่อผู้ใช้</Text>
+        <Text style={styles.label}>ชื่อผู้ใช้หรืออีเมล</Text>
         <TextInput
           style={styles.input}
-          placeholder="username"
+          placeholder="username หรือ email"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"

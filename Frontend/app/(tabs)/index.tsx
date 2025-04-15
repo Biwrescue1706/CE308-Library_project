@@ -1,68 +1,63 @@
 import { useRouter } from "expo-router";
-import React, { useState, useCallback } from "react";
-import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Button, ActivityIndicator, StyleSheet, } from "react-native";
-import axios from "axios";
-import { StackNavigationProp } from "@react-navigation/stack";
-import Constants from "expo-constants";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  Button,
+  StyleSheet,
+} from "react-native";
+import { getAllBooks, deleteBook, updateBook, borrowBook, getMe } from "../utils/api";
 import { useFocusEffect } from "@react-navigation/native";
-
-type HomeScreenProps = {
-  navigation: StackNavigationProp<any>;
-};
-
-// 🔹 URL ของ Backend API (เปลี่ยนเป็นของคุณ)
-const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const router = useRouter();
   const [books, setBooks] = useState<any[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string>("");
 
-  // 📌 ดึงข้อมูลหนังสือจาก API
+  useEffect(() => {
+    getMe()
+      .then((res) => setUserRole(res.data.user.role))
+      .catch((err) => console.error("❌ ไม่สามารถดึง role ผู้ใช้ได้:", err));
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      axios
-        .get(`${API_URL}/books/getAllBooks`)
-        .then((response) => setBooks(response.data))
+      getAllBooks()
+        .then((res) => setBooks(res.data))
         .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการดึงหนังสือ :", error));
     }, [])
   );
 
-  // 📌 ลบหนังสือ
   const handleDelete = (id: string) => {
-    axios
-      .delete(`${API_URL}/deleteBooks/${id}`)
+    deleteBook(id)
       .then(() => {
         setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
       })
       .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการลบหนังสือ :", error));
   };
 
-  // 📌 แก้ไขหนังสือ (เปิด Modal)
   const handleEdit = (book: any) => {
     setSelectedBook(book);
     setModalVisible(true);
   };
 
-  // 📌 ปิด Modal
   const closeModal = () => {
     setModalVisible(false);
     setSelectedBook(null);
   };
 
-  //ฟังก์ชัน handleBorrow
   const handleBorrow = async (book: any) => {
     if (book.availableCopies > 0) {
       try {
-        const updatedBook = {
-          ...book,
-          availableCopies: book.availableCopies - 1,
-        };
-
-        await axios.put(`${API_URL}/books/getBooks/${book.id}`, updatedBook);
+        const updatedBook = await borrowBook(book.id);
         setBooks((prevBooks) =>
-          prevBooks.map((b) => (b.id === book.id ? updatedBook : b))
+          prevBooks.map((b) => (b.id === book.id ? updatedBook.data : b))
         );
       } catch (error) {
         console.error("❌ Error borrowing book:", error);
@@ -70,10 +65,9 @@ export default function HomeScreen() {
     }
   };
 
-  // 📌 บันทึกการแก้ไขหนังสือ
   const handleUpdate = () => {
     if (selectedBook) {
-      const updatedBook = {
+      const updatedFields = {
         title: selectedBook.title,
         author: selectedBook.author,
         description: selectedBook.description,
@@ -82,7 +76,7 @@ export default function HomeScreen() {
         availableCopies: selectedBook.availableCopies,
       };
 
-      axios.put(`${API_URL}/books/editBooks/${selectedBook.id}`, updatedBook)
+      updateBook(selectedBook.id, updatedFields)
         .then(() => {
           closeModal();
           setBooks((prevBooks) =>
@@ -121,24 +115,27 @@ export default function HomeScreen() {
                   {item.availableCopies > 0 ? "📖 ยืม" : "❌ หมด"}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => handleEdit(item)}
-              >
-                <Text style={styles.buttonText}>✏️ แก้ไข</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(item.id)}
-              >
-                <Text style={styles.buttonText}>🗑️ ลบ</Text>
-              </TouchableOpacity>
+              {userRole === "admin" && (
+                <>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => handleEdit(item)}
+                  >
+                    <Text style={styles.buttonText}>✏️ แก้ไข</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDelete(item.id)}
+                  >
+                    <Text style={styles.buttonText}>🗑️ ลบ</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </View>
         )}
       />
 
-      {/* 🟢 Modal สำหรับแก้ไขหนังสือ */}
       <Modal visible={isModalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -147,48 +144,40 @@ export default function HomeScreen() {
               style={styles.input}
               placeholder="ชื่อหนังสือ"
               value={selectedBook?.title}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, title: text })
-              }
+              onChangeText={(text) => setSelectedBook({ ...selectedBook, title: text })}
             />
             <TextInput
               style={styles.input}
               placeholder="ผู้แต่ง"
               value={selectedBook?.author}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, author: text })
-              }
+              onChangeText={(text) => setSelectedBook({ ...selectedBook, author: text })}
             />
             <TextInput
               style={styles.input}
               placeholder="คำอธิบาย"
               value={selectedBook?.description}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, description: text })
-              }
+              onChangeText={(text) => setSelectedBook({ ...selectedBook, description: text })}
             />
             <TextInput
               style={styles.input}
-              placeholder="หมวดหมู่ "
+              placeholder="หมวดหมู่"
               value={selectedBook?.category}
+              onChangeText={(text) => setSelectedBook({ ...selectedBook, category: text })}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="จำนวนทั้งหมด"
+              value={String(selectedBook?.totalCopies)}
               onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, category: text })
+                setSelectedBook({ ...selectedBook, totalCopies: parseInt(text) })
               }
             />
             <TextInput
               style={styles.input}
-              placeholder=" จำนวนทั้งหมด  "
-              value={selectedBook?.totalCopies}
+              placeholder="จำนวนหนังสือที่เหลือ"
+              value={String(selectedBook?.availableCopies)}
               onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, totalCopies: parseFloat(text) })
-              }
-            />
-            <TextInput
-              style={styles.input}
-              placeholder=" จำนวนหนังสือที่เหลือ  "
-              value={selectedBook?.availableCopies}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, availableCopies: parseFloat(text) })
+                setSelectedBook({ ...selectedBook, availableCopies: parseInt(text) })
               }
             />
 
@@ -201,10 +190,9 @@ export default function HomeScreen() {
   );
 }
 
-// 🎨 **Styles (CSS)**
 const styles = StyleSheet.create({
   container: {
-    flex: 3,
+    flex: 1,
     backgroundColor: "#C8E6B2",
     padding: 25,
   },
@@ -235,6 +223,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 10,
   },
+  borrowButton: {
+    backgroundColor: "#007bff",
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
   editButton: {
     backgroundColor: "#0de136",
     padding: 10,
@@ -256,8 +252,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-
-  /** ✅ เพิ่ม Style ที่หายไป **/
   modalOverlay: {
     flex: 1,
     justifyContent: "center",
@@ -283,13 +277,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
-  },
-  borrowButton: {
-    backgroundColor: "#007bff",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginHorizontal: 5,
-    alignItems: "center",
   },
 });

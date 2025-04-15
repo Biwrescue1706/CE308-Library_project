@@ -1,15 +1,7 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  KeyboardAvoidingView,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  Alert, ActivityIndicator, Platform, ScrollView, KeyboardAvoidingView,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -22,6 +14,7 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const [form, setForm] = useState({
+    email: "",
     username: "",
     password: "",
     confirmPassword: "",
@@ -41,6 +34,7 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     const {
+      email,
       username,
       password,
       confirmPassword,
@@ -52,6 +46,7 @@ export default function RegisterScreen() {
     } = form;
 
     if (
+      !email ||
       !username ||
       !password ||
       !confirmPassword ||
@@ -72,7 +67,7 @@ export default function RegisterScreen() {
     setLoading(true);
 
     try {
-      await axios.post(`${API_URL}/auth/register`, {
+      await axios.post(`${API_URL}/users/register`, {
         username,
         password,
         titleTH,
@@ -103,6 +98,15 @@ export default function RegisterScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.container}>
           <Text style={styles.header}>📝 สมัครสมาชิก</Text>
+
+          <Text style={styles.label}>อีเมล</Text>
+          <TextInput
+            style={styles.input}
+            value={form.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            onChangeText={(text) => handleChange("email", text)}
+          />
 
           <Text style={styles.label}>ชื่อผู้ใช้ (Username)</Text>
           <TextInput

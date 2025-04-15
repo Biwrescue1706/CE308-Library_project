@@ -38,8 +38,9 @@ export default function AddBooksScreen() {
 
         if (res.data.role !== "admin") {
           Alert.alert("🚫 คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
-          router.replace("/(tabs)/account");
+          router.replace("/addBooks");
         } else {
+          router.replace("/(tabs)/index");
           setLoading(false);
         }
       } catch (error) {
