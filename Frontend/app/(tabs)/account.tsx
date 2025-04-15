@@ -14,15 +14,15 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function AccountScreen() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [users, setUsers] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   // 📌 ดึงข้อมูลผู้ใช้จาก API
   useEffect(() => {
     axios
-      .get(`${API_URL}/user/me`)
+      .get(`${API_URL}/users/me`)
       .then((response) => {
-        setUser(response.data);
+        setUsers(response.data);
         setLoading(false);
       })
       .catch((error) => {
@@ -34,10 +34,10 @@ export default function AccountScreen() {
   // 📌 ออกจากระบบ
   const handleLogout = () => {
     axios
-      .post(`${API_URL}/auth/logout`)
+      .post(`${API_URL}/users/logout`)
       .then(() => {
         console.log("✅ Logout successful");
-        router.replace("./login"); // เปลี่ยนเส้นทางไปหน้า login
+        router.replace("/login"); // เปลี่ยนเส้นทางไปหน้า login
       })
       .catch((error) => console.error("❌ Error logging out:", error));
   };
@@ -51,17 +51,17 @@ export default function AccountScreen() {
       ) : (
         <>
           <Text> </Text>
-          <Text>📧 อีเมล: {user?.email}</Text>
+          <Text>📧 อีเมล: {users?.email}</Text>
           <Text> </Text>
-          <Text>🆔 รหัสสมาชิก: {user?.memberId}</Text>
+          <Text>🆔 รหัสสมาชิก: {users?.memberId}</Text>
           <Text> </Text>
-          <Text>👤 ชื่อ: {user?.FNameTH} {user?.LNameTH}</Text>
+          <Text>👤 ชื่อ: {users?.FNameTH} {users?.LNameTH}</Text>
           <Text> </Text>
-          <Text>📞 เบอร์โทร: {user?.phone}</Text>
+          <Text>📞 เบอร์โทร: {users?.phone}</Text>
           <Text> </Text>
           <Text>
             📅 วันสมัครสมาชิก:{" "}
-            {new Date(user?.joinDate).toLocaleDateString()}
+            {new Date(users?.joinDate).toLocaleDateString()}
           </Text>
           <Text> </Text>
           <TouchableOpacity

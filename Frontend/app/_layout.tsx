@@ -7,8 +7,8 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       {/* หน้าจออื่นๆ ที่อยู่นอก Tab เช่น Profile */}
       <Stack.Screen name="(screens)/profile" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)/login" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)/register" options={{ headerShown: false }} />
+      <Stack.Screen name="/login" options={{ headerShown: false }} />
+      <Stack.Screen name="/register" options={{ headerShown: false }} />
       {/* Error Page สำหรับหน้าไม่พบ */}
       <Stack.Screen name="+not-found" />
     </Stack>

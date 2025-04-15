@@ -9,7 +9,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { login } from "../utils/api"; // ✅ import จากไฟล์รวม api
+import axios from "axios";
+import Constants from "expo-constants";
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+// 👉 เปิดใช้งาน cookie (สำคัญมาก)
+axios.defaults.withCredentials = true;
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -26,21 +32,28 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const response = await login(username, password); // ✅ เรียกผ่าน API รวม
-      const { user } = response.data;
+      const res = await axios.post(
+        `${API_URL}/users/login`,
+        { username, password },
+        { withCredentials: true } // 🟢 ให้แน่ใจว่าแนบ cookies ไปด้วย
+      );
+
+      const { user } = res.data;
+
+      console.log("✅ เข้าสู่ระบบแล้ว:", user);
 
       Alert.alert("✅ เข้าสู่ระบบสำเร็จ");
 
       if (user.role === "admin") {
         router.replace("/addBooks");
       } else {
-        router.replace("/index");
+        router.replace("./(tabs)/index");
       }
-    } catch (error: any) {
-      console.error("❌ Login error:", error.response?.data || error.message);
+    } catch (err: any) {
+      console.error("❌ Login error:", err.response?.data || err.message);
       Alert.alert(
         "❌ เข้าสู่ระบบล้มเหลว",
-        error.response?.data?.error || "โปรดลองใหม่"
+        err.response?.data?.error || "โปรดลองใหม่"
       );
     } finally {
       setLoading(false);
@@ -52,10 +65,10 @@ export default function LoginScreen() {
       <View style={styles.loginBox}>
         <Text style={styles.header}>🔐 เข้าสู่ระบบ</Text>
 
-        <Text style={styles.label}>ชื่อผู้ใช้หรืออีเมล</Text>
+        <Text style={styles.label}>ชื่อผู้ใช้</Text>
         <TextInput
           style={styles.input}
-          placeholder="username หรือ email"
+          placeholder="username"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"

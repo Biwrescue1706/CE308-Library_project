@@ -19,15 +19,17 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export default function AddBooksScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     title: "",
     author: "",
-    isbn: "",
+    description: "",
     category: "",
-    quantity: "1",
+    totalCopies: "1",
+    availableCopies: "1",
   });
 
-  // ✅ ตรวจสอบ role ก่อนเข้าหน้านี้
   useEffect(() => {
     const checkRole = async () => {
       try {
@@ -38,9 +40,9 @@ export default function AddBooksScreen() {
 
         if (res.data.role !== "admin") {
           Alert.alert("🚫 คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
-          router.replace("/addBooks");
+          router.replace("/");
         } else {
-          router.replace("/(tabs)/index");
+          setUserId(res.data.id);
           setLoading(false);
         }
       } catch (error) {
@@ -58,9 +60,23 @@ export default function AddBooksScreen() {
   };
 
   const handleAddBook = async () => {
-    const { title, author, isbn, category, quantity } = form;
+    const {
+      title,
+      author,
+      description,
+      category,
+      totalCopies,
+      availableCopies,
+    } = form;
 
-    if (!title || !author || !isbn || !category || !quantity) {
+    if (
+      !title ||
+      !author ||
+      !description ||
+      !category ||
+      !totalCopies ||
+      !availableCopies
+    ) {
       Alert.alert("⚠️ กรุณากรอกข้อมูลให้ครบ");
       return;
     }
@@ -68,13 +84,15 @@ export default function AddBooksScreen() {
     try {
       const token = await AsyncStorage.getItem("token");
       await axios.post(
-        `${API_URL}/books/add`,
+        `${API_URL}/books/create`,
         {
           title,
           author,
-          isbn,
+          description,
           category,
-          quantity: parseInt(quantity),
+          totalCopies: parseInt(totalCopies),
+          availableCopies: parseInt(availableCopies),
+          createdById: userId,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -82,7 +100,14 @@ export default function AddBooksScreen() {
       );
 
       Alert.alert("✅ เพิ่มหนังสือสำเร็จ");
-      setForm({ title: "", author: "", isbn: "", category: "", quantity: "1" });
+      setForm({
+        title: "",
+        author: "",
+        description: "",
+        category: "",
+        totalCopies: "1",
+        availableCopies: "1",
+      });
     } catch (error: any) {
       console.error("❌ Add book error:", error.response?.data || error.message);
       Alert.alert("❌ เพิ่มหนังสือไม่สำเร็จ", error.response?.data?.message || "โปรดลองใหม่");
@@ -101,14 +126,27 @@ export default function AddBooksScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>📚 เพิ่มหนังสือใหม่</Text>
 
-      {["title", "author", "isbn", "category", "quantity"].map((key) => (
+      {[
+        "title",
+        "author",
+        "description",
+        "category",
+        "totalCopies",
+        "availableCopies",
+      ].map((key) => (
         <View key={key}>
           <Text style={styles.label}>{getLabel(key)}</Text>
           <TextInput
             style={styles.input}
             value={form[key as keyof typeof form]}
             onChangeText={(text) => handleChange(key, text)}
-            keyboardType={key === "quantity" ? "numeric" : "default"}
+            keyboardType={
+              key === "totalCopies" || key === "availableCopies"
+                ? "numeric"
+                : "default"
+            }
+            multiline={key === "description"}
+            numberOfLines={key === "description" ? 4 : 1}
           />
         </View>
       ))}
@@ -120,19 +158,20 @@ export default function AddBooksScreen() {
   );
 }
 
-// 👇 Helper สำหรับแสดง label ภาษาไทย
 const getLabel = (key: string) => {
   switch (key) {
     case "title":
       return "ชื่อหนังสือ";
     case "author":
       return "ผู้แต่ง";
-    case "isbn":
-      return "ISBN";
+    case "description":
+      return "รายละเอียด";
     case "category":
       return "หมวดหมู่";
-    case "quantity":
-      return "จำนวน";
+    case "totalCopies":
+      return "จำนวนทั้งหมด";
+    case "availableCopies":
+      return "จำนวนที่สามารถยืมได้";
     default:
       return key;
   }
@@ -165,6 +204,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     marginTop: 5,
+    backgroundColor: "#fff",
   },
   button: {
     backgroundColor: "#28a745",

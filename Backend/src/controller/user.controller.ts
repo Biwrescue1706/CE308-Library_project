@@ -76,7 +76,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // ✅ ใส่ token ใน cookie
     res.cookie("token", token, {
       httpOnly: true,       // ปลอดภัยจาก XSS
-      secure: false,        // ✅ เปลี่ยนเป็น true ถ้าใช้ https
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",      // ป้องกัน CSRF ระดับหนึ่ง
       maxAge: 30 * 60 * 1000 // 30 นาที    
 
