@@ -27,7 +27,7 @@ model User {
   lastNameEN       String? //นามสกุลอังกฤษ
   birthDate        DateTime //วันเกิด
   phone            String //โทรศัพท์ 
-  role             String @default("user") // เช่น admin, user 
+  role             String   @default("user") // เช่น admin, user 
   houseNumber      String? //บ้านเลขที่
   villageNo        String? //หมู่
   alley            String? //ซอย
@@ -67,6 +67,7 @@ model Loan {
   id         String    @id @default(uuid())
   userId     String // รหัสผู้ใช้งาน
   bookId     String // รหัสหนังสือ
+  quantity   Int       @default(1) // ✅ จำนวนเล่มที่ยืม
   loanDate   DateTime  @default(now()) // วันที่ยืม
   returnDate DateTime? // วันที่คืน
   returned   Boolean   @default(false) // สถานะการคืนหนังสือ
