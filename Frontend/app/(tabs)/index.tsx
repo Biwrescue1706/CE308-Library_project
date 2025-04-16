@@ -1,17 +1,14 @@
 import { useRouter } from "expo-router";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  Button,
-  StyleSheet,
+  View, Text, FlatList, TouchableOpacity,
+  Modal, TextInput, Button, StyleSheet, RefreshControl,
 } from "react-native";
-import { getAllBooks, deleteBook, updateBook, borrowBook, getMe } from "../utils/api";
+import axios from "axios";
+import Constants from "expo-constants";
 import { useFocusEffect } from "@react-navigation/native";
+
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -19,31 +16,57 @@ export default function HomeScreen() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedBook, setSelectedBook] = useState<any>(null);
   const [userRole, setUserRole] = useState<string>("");
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    getMe()
-      .then((res) => setUserRole(res.data.user.role))
-      .catch((err) => console.error("❌ ไม่สามารถดึง role ผู้ใช้ได้:", err));
+  const fetchBooks = () => {
+    axios
+      .get(`${API_URL}/books/getAllBooks`, { withCredentials: true })
+      .then((response) => setBooks(response.data))
+      .catch((error) => {
+        console.error("❌ เกิดข้อผิดพลาดในการดึงหนังสือ:");
+        console.log("📦 error.response:", error.response?.data);
+        console.log("📦 error.message:", error.message);
+        console.log("📦 error.config:", error.config?.url);
+      });
+  };
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchBooks();
+    setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      getAllBooks()
-        .then((res) => setBooks(res.data))
-        .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการดึงหนังสือ :", error));
+      axios
+        .get(`${API_URL}/users/me`, { withCredentials: true })
+        .then((response) => setUserRole(response.data.user.role))
+        .catch((error) => {
+          console.error("❌ เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้:", error);
+          console.log("🚫 ไม่พบ session หรือ Token:", error.response?.status);
+          setUserRole(""); // 🧼 เคลียร์ role กลับเป็นผู้ใช้ทั่วไป
+          router.replace("/");
+        });
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBooks();
     }, [])
   );
 
   const handleDelete = (id: string) => {
-    deleteBook(id)
+    axios
+      .delete(`${API_URL}/books/deleteBooks/${id}`, { withCredentials: true })
       .then(() => {
         setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
       })
-      .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการลบหนังสือ :", error));
+      .catch((error) => console.error("❌ เกิดข้อผิดพลาดในการลบหนังสือ:", error));
   };
 
   const handleEdit = (book: any) => {
-    setSelectedBook(book);
+    setSelectedBook({ ...book });
     setModalVisible(true);
   };
 
@@ -55,37 +78,44 @@ export default function HomeScreen() {
   const handleBorrow = async (book: any) => {
     if (book.availableCopies > 0) {
       try {
-        const updatedBook = await borrowBook(book.id);
-        setBooks((prevBooks) =>
-          prevBooks.map((b) => (b.id === book.id ? updatedBook.data : b))
+        await axios.post(
+          `${API_URL}/loans/borrow`,
+          { items: [{ bookId: book.id, quantity: 1 }] },
+          { withCredentials: true }
         );
-      } catch (error) {
-        console.error("❌ Error borrowing book:", error);
+        setBooks((prev) =>
+          prev.map((b) =>
+            b.id === book.id ? { ...b, availableCopies: b.availableCopies - 1 } : b
+          )
+        );
+      } catch (err) {
+        console.error("❌ ยืมหนังสือผิดพลาด:", err);
       }
     }
   };
 
   const handleUpdate = () => {
     if (selectedBook) {
-      const updatedFields = {
+      const updateData = {
         title: selectedBook.title,
         author: selectedBook.author,
         description: selectedBook.description,
         category: selectedBook.category,
-        totalCopies: selectedBook.totalCopies,
-        availableCopies: selectedBook.availableCopies,
+        totalCopies: Number(selectedBook.totalCopies),
+        availableCopies: Number(selectedBook.availableCopies),
       };
 
-      updateBook(selectedBook.id, updatedFields)
-        .then(() => {
-          closeModal();
-          setBooks((prevBooks) =>
-            prevBooks.map((book) =>
-              book.id === selectedBook.id ? { ...selectedBook } : book
-            )
-          );
+      axios
+        .put(`${API_URL}/books/editBooks/${selectedBook.id}`, updateData, {
+          withCredentials: true,
         })
-        .catch((error) => console.error("❌ Error updating book:", error));
+        .then(() => {
+          setBooks((prev) =>
+            prev.map((b) => (b.id === selectedBook.id ? selectedBook : b))
+          );
+          closeModal();
+        })
+        .catch((err) => console.error("❌ อัปเดตผิดพลาด:", err));
     }
   };
 
@@ -97,15 +127,20 @@ export default function HomeScreen() {
           a.title.localeCompare(b.title) || a.availableCopies - b.availableCopies
         )}
         keyExtractor={(item) => item.id}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         renderItem={({ item }) => (
           <View style={styles.bookContainer}>
             <Text style={styles.bookTitle}>📖 {item.title}</Text>
-            <Text>ผู้แต่ง : {item.author}</Text>
-            <Text>คำอธิบาย : {item.description}</Text>
             <Text>หมวดหมู่ : {item.category}</Text>
             <Text>จํานวนหนังสือที่เหลือ : {item.availableCopies}</Text>
 
             <View style={styles.buttonGroup}>
+              <TouchableOpacity onPress={() => router.push(`./book/${item.id}`)}>
+                <Text style={{ color: "#007bff", marginTop: 10, textAlign: "center" }}>
+                  🔍 ดูรายละเอียด
+                </Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.borrowButton}
                 onPress={() => handleBorrow(item)}
@@ -140,47 +175,54 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>📝 แก้ไขหนังสือ</Text>
+            <Text style={styles.inputLabel}>ชื่อหนังสือ : </Text>
             <TextInput
               style={styles.input}
               placeholder="ชื่อหนังสือ"
-              value={selectedBook?.title}
+              value={selectedBook?.title || ""}
               onChangeText={(text) => setSelectedBook({ ...selectedBook, title: text })}
             />
+            <Text style={styles.inputLabel}> ผู้แต่ง : </Text>
             <TextInput
               style={styles.input}
               placeholder="ผู้แต่ง"
-              value={selectedBook?.author}
+              value={selectedBook?.author || ""}
               onChangeText={(text) => setSelectedBook({ ...selectedBook, author: text })}
             />
+            <Text style={styles.inputLabel}> คำอธิบาย : </Text>
             <TextInput
               style={styles.input}
               placeholder="คำอธิบาย"
-              value={selectedBook?.description}
+              value={selectedBook?.description || ""}
               onChangeText={(text) => setSelectedBook({ ...selectedBook, description: text })}
             />
+            <Text style={styles.inputLabel}> หมวดหมู่ : </Text>
             <TextInput
               style={styles.input}
               placeholder="หมวดหมู่"
-              value={selectedBook?.category}
+              value={selectedBook?.category || ""}
               onChangeText={(text) => setSelectedBook({ ...selectedBook, category: text })}
             />
+            <Text style={styles.inputLabel}> จำนวนทั้งหมด : </Text>
             <TextInput
               style={styles.input}
               placeholder="จำนวนทั้งหมด"
-              value={String(selectedBook?.totalCopies)}
+              keyboardType="numeric"
+              value={selectedBook?.totalCopies?.toString() || ""}
               onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, totalCopies: parseInt(text) })
+                setSelectedBook({ ...selectedBook, totalCopies: Number(text) })
               }
             />
+            <Text style={styles.inputLabel}> จำนวนหนังสือที่เหลือ : </Text>
             <TextInput
               style={styles.input}
               placeholder="จำนวนหนังสือที่เหลือ"
-              value={String(selectedBook?.availableCopies)}
+              keyboardType="numeric"
+              value={selectedBook?.availableCopies?.toString() || ""}
               onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, availableCopies: parseInt(text) })
+                setSelectedBook({ ...selectedBook, availableCopies: Number(text) })
               }
             />
-
             <Button title="💾 บันทึก" onPress={handleUpdate} />
             <Button title="❌ ยกเลิก" onPress={closeModal} />
           </View>
@@ -269,6 +311,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  inputLabel: {
+    alignSelf: "flex-start",
+    fontWeight: "600",
+    marginTop: 10,
   },
   input: {
     width: "100%",

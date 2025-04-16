@@ -59,8 +59,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 // ✅ เข้าสู่ระบบด้วย username หรือ email
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body;
-    const user = await UserService.loginUserByUsernameOrEmail(username, password);
+    const { usernameOrEmail, password } = req.body;
+    const user = await UserService.loginUserByUsernameOrEmail(usernameOrEmail, password);
 
     if (!user) {
       res.status(401).json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
@@ -118,7 +118,42 @@ export const logout = (req: Request, res: Response) => {
   res.json({ message: "ออกจากระบบเรียบร้อย" });
 };
 
-export const getMe = (req: Request, res: Response) => {
-  const user = (req as any).user;
-  res.json({ user });
+export const getMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req as any).user.id;
+
+    const user = await UserService.getUserByIdWithProfile(userId); // ✅ เรียกจาก service
+
+    if (!user) {
+      res.status(404).json({ error: "ไม่พบผู้ใช้" });
+      return
+    }
+
+    res.json({ user });
+  } catch (err) {
+    console.error("❌ Error in getMe:", err);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้" });
+  }
+};
+
+// ✅ ดึงประวัติการยืมหนังสือของผู้ใช้
+export const getHistory = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+
+    const history = await prisma.loan.findMany({
+      where: { userId },
+      include: {
+        book: true,
+      },
+      orderBy: {
+        loanDate: "desc", // ✅ ใช้ loanDate ตาม schema ของคุณ
+      },
+    });
+
+    res.json({ history });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "ไม่สามารถดึงประวัติการยืมได้" });
+  }
 };

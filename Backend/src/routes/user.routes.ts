@@ -1,7 +1,7 @@
 // 📁 src/routes/user.routes.ts
 import express from "express";
 import * as UserController from "../controller/user.controller";
-import {authenticate} from "../middleware/auth.middleware";
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = express.Router();
 
@@ -12,13 +12,18 @@ router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 
 // ✅ อัปเดตข้อมูลผู้ใช้ (ใช้ username เป็น param)
-router.put("/update/:username" , authenticate , UserController.updateProfile);
+router.put("/update/:username", authenticate, UserController.updateProfile);
 
 // ✅ ลบผู้ใช้
-router.delete("/delete/:username" , authenticate, UserController.deleteUser);
+router.delete("/delete/:username", authenticate, UserController.deleteUser);
 
+// ✅ ออกจากระบบ
 router.post("/logout", UserController.logout);
 
+// ✅ ดึงข้อมูลผู้ใช้ (ต้อง login แล้ว)
 router.get("/me", authenticate, UserController.getMe);
+
+// ✅ ประวัติการยืมหนังสือของผู้ใช้ที่ login
+router.get("/history", authenticate, UserController.getHistory);
 
 export default router;

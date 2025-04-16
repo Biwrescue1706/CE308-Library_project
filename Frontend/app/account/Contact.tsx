@@ -4,11 +4,10 @@ import {
   Text,
   StyleSheet,
   Linking,
-  TouchableOpacity,
   ScrollView,
 } from "react-native";
 
-export default function Contact() {
+export default function ContactScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>📞 ช่องทางติดต่อ</Text>

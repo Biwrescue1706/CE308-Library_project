@@ -22,10 +22,10 @@ export default function HistoryScreen() {
   // 📌 ดึงประวัติการยืมหนังสือ
   useEffect(() => {
     axios
-      .get(`${API_URL}/user/me`)
+      .get(`${API_URL}/users/me`)
       .then(() => {
         setIsLoggedIn(true);
-        return axios.get(`${API_URL}/user/history`);
+        return axios.get(`${API_URL}/users/history`);
       })
       .then((response) => {
         setHistory(response.data);
@@ -41,7 +41,7 @@ export default function HistoryScreen() {
   // 📌 คืนหนังสือ
   const handleReturnBook = (loanId: string) => {
     axios
-      .post(`${API_URL}/books/return`, { loanId })
+      .post(`${API_URL}/lons/return`, { loanId })
       .then(() => {
         setHistory((prev) =>
           prev.map((item) =>

@@ -13,46 +13,42 @@ import axios from "axios";
 import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
-
-// 👉 เปิดใช้งาน cookie (สำคัญมาก)
 axios.defaults.withCredentials = true;
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!username || !password) {
-      Alert.alert("⚠️ กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
+    if (!usernameOrEmail || !password) {
+      Alert.alert("กรุณากรอกชื่อผู้ใช้หรืออีเมล และรหัสผ่าน");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        `${API_URL}/users/login`,
-        { username, password },
-        { withCredentials: true } // 🟢 ให้แน่ใจว่าแนบ cookies ไปด้วย
-      );
+      const res = await axios.post(`${API_URL}/users/login`, {
+        usernameOrEmail,
+        password
+      });
 
       const { user } = res.data;
+      console.log("เข้าสู่ระบบแล้ว:", user);
 
-      console.log("✅ เข้าสู่ระบบแล้ว:", user);
-
-      Alert.alert("✅ เข้าสู่ระบบสำเร็จ");
+      Alert.alert(" เข้าสู่ระบบสำเร็จ");
 
       if (user.role === "admin") {
-        router.replace("/addBooks");
+        router.replace("./(tabs)/addBooks");
       } else {
-        router.replace("./(tabs)/index");
+        router.replace("/");
       }
     } catch (err: any) {
-      console.error("❌ Login error:", err.response?.data || err.message);
+      console.error(" Login error:", err.response?.data || err.message);
       Alert.alert(
-        "❌ เข้าสู่ระบบล้มเหลว",
+        " เข้าสู่ระบบล้มเหลว",
         err.response?.data?.error || "โปรดลองใหม่"
       );
     } finally {
@@ -63,14 +59,14 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.loginBox}>
-        <Text style={styles.header}>🔐 เข้าสู่ระบบ</Text>
+        <Text style={styles.header}>🔑 เข้าสู่ระบบ</Text>
 
-        <Text style={styles.label}>ชื่อผู้ใช้</Text>
+        <Text style={styles.label}>อีเมล</Text>
         <TextInput
           style={styles.input}
-          placeholder="username"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="email"
+          value={usernameOrEmail}
+          onChangeText={setUsernameOrEmail}
           autoCapitalize="none"
         />
 
