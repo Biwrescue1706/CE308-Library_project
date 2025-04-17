@@ -7,6 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
   ScrollView,
+  Alert ,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -40,6 +41,13 @@ export default function AccountScreen() {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    if (!loading && users === null) {
+      Alert.alert("หมดเวลาใช้งาน", "กรุณาเข้าสู่ระบบใหม่");
+      router.replace("/(auth)/login");
+    }
+  }, [loading, users]);
 
   const handleLogout = () => {
     axios
@@ -143,12 +151,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     marginVertical: 10,
-    width: 250,
+    width: 300,
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "bold",
   },
   logoutButton: {

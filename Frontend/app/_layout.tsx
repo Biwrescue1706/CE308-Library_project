@@ -10,9 +10,9 @@ export default function RootLayout() {
       <Stack.Screen name="(screens)/profile" options={{ headerShown: false }} />
 
       {/* Auth */}
-      <Stack.Screen name="/(auth)/login" options={{ headerShown: false }} />
-      <Stack.Screen name="/(auth)/register" options={{ headerShown: false }} />
-      
+      <Stack.Screen name="/(auth)" options={{ headerShown: false }} />
+      <Stack.Screen name="/account" options={{ headerShown: false }} />
+      <Stack.Screen name="/book" options={{ headerShown: false }} />
       {/* Error Page สำหรับหน้าไม่พบ */}
       <Stack.Screen name="+not-found" />
       

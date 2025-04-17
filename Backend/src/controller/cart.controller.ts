@@ -46,6 +46,7 @@ export const removeFromCart = async (req: Request, res: Response) => {
   res.json({ message: "ลบออกจากตะกร้าสำเร็จ" });
 };
 
+
 export const clearCart = async (req: Request, res: Response) => {
   const user = (req as any).user;
 

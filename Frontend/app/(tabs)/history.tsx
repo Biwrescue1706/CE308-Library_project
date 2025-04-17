@@ -57,7 +57,7 @@ export default function HistoryScreen() {
     return (
       <View style={styles.container}>
         <Text style={styles.header}>⚠️ กรุณาเข้าสู่ระบบก่อนดูประวัติ</Text>
-        <TouchableOpacity style={styles.loginButton} onPress={() => router.push("/login")}>
+        <TouchableOpacity style={styles.loginButton} onPress={() => router.push("/(auth)/login")}>
           <Text style={styles.buttonText}>🔑 เข้าสู่ระบบ</Text>
         </TouchableOpacity>
       </View>

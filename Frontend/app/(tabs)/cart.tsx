@@ -40,14 +40,12 @@ export default function CartScreen() {
         setIsLoggedIn(false);
         setLoading(false);
         setRefreshing(false);
-  
         if (err.response?.status === 401 || err.response?.status === 403) {
           Alert.alert("หมดเวลาใช้งาน", "กรุณาเข้าสู่ระบบใหม่");
-          router.replace("/(auth)/login"); // ✅ redirect ไป login
+          router.replace("/(auth)/login");
         }
       });
   };
-  
 
   useEffect(() => {
     fetchCart();
@@ -55,7 +53,7 @@ export default function CartScreen() {
 
   const handleRemove = (bookId: string) => {
     axios
-      .delete(`${API_URL}/cart/${bookId}`, { withCredentials: true })
+      .delete(`${API_URL}/cart/remove/${bookId}`, { withCredentials: true })
       .then(() => {
         Alert.alert("✅ ลบสำเร็จ");
         fetchCart();
@@ -82,7 +80,10 @@ export default function CartScreen() {
       .post(
         `${API_URL}/loans/borrow`,
         {
-          items: items.map((item) => ({ bookId: item.bookId, quantity: item.quantity ?? 1 })),
+          items: items.map((item) => ({
+            bookId: item.book.id,
+            quantity: item.quantity ?? 1,
+          })),
         },
         { withCredentials: true }
       )
@@ -117,7 +118,9 @@ export default function CartScreen() {
       contentContainerStyle={styles.container}
       data={items}
       keyExtractor={(item) => item.id}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchCart} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={fetchCart} />
+      }
       ListHeaderComponent={<Text style={styles.header}>🛒 ตะกร้าหนังสือ</Text>}
       ListEmptyComponent={<Text style={styles.empty}>ไม่มีรายการในตะกร้า</Text>}
       renderItem={({ item }) => (
@@ -127,12 +130,9 @@ export default function CartScreen() {
           <Text>จำนวน: {item.quantity ?? 1}</Text>
           <TouchableOpacity
             style={styles.removeButton}
-            onPress={() => handleRemove(item.bookId)}
+            onPress={() => handleRemove(item.book.id)}
           >
-            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-              <Text style={{ color: "white" }}>ลบ</Text>
-            </TouchableOpacity>
-
+            <Text style={styles.buttonText}>ลบ</Text>
           </TouchableOpacity>
         </View>
       )}
