@@ -56,7 +56,7 @@ export default function TabLayout() {
                 }}
             />
 
-            {isAuthenticated && role === "admin" && (
+            {isAuthenticated || role === "admin" && (
                 <Tabs.Screen
                     name="addBooks"
                     options={{

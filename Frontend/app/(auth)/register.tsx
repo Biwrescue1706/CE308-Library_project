@@ -1,4 +1,3 @@
-// ✅ (auth)/register.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -11,6 +10,8 @@ import {
   Platform,
   ScrollView,
   KeyboardAvoidingView,
+  Modal,
+  FlatList,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -18,6 +19,13 @@ import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
+
+const titleOptions = [
+  "นางสาว", "นาง", "นาย", "เด็กหญิง", "เด็กชาย",
+  "พระสงฆ์", "บาทหลวง", "หม่อมหลวง", "หม่อมราชวงศ์",
+  "หม่อมเจ้า", "ศาสตราจารย์เกียรติคุณ", "ศาสตราจารย์",
+  "ผู้ช่วยศาสตราจารย์", "รองศาสตราจารย์",
+];
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -33,6 +41,7 @@ export default function RegisterScreen() {
     birthDate: new Date(),
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTitleModal, setShowTitleModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,7 +84,7 @@ export default function RegisterScreen() {
         lastNameTH,
         birthDate: birthDate.toISOString(),
         phone,
-        role: "user", // ✅ เพิ่มค่า role เป็น user โดยอัตโนมัติ
+        role: "user",
       });
 
       Alert.alert("✅ สมัครสมาชิกสำเร็จ", "กรุณาเข้าสู่ระบบ");
@@ -120,15 +129,6 @@ export default function RegisterScreen() {
             value={form.password}
             onChangeText={(text) => handleChange("password", text)}
           />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={{ marginHorizontal: 20, marginBottom: 10 }}
-          >
-            <Text style={{ color: "#007bff" }}>
-              {showPassword ? "🙈 ซ่อนรหัสผ่าน" : "👁️ แสดงรหัสผ่าน"}
-            </Text>
-          </TouchableOpacity>
-
           <Text style={styles.label}>ยืนยันรหัสผ่าน</Text>
           <TextInput
             style={styles.input}
@@ -136,10 +136,9 @@ export default function RegisterScreen() {
             value={form.confirmPassword}
             onChangeText={(text) => handleChange("confirmPassword", text)}
           />
-
           <TouchableOpacity
             onPress={() => setShowPassword(!showPassword)}
-            style={{ marginHorizontal: 20, marginBottom: 10 }}
+            style={{ marginLeft: 25, marginBottom: 15 }}
           >
             <Text style={{ color: "#007bff" }}>
               {showPassword ? "🙈 ซ่อนรหัสผ่าน" : "👁️ แสดงรหัสผ่าน"}
@@ -147,11 +146,9 @@ export default function RegisterScreen() {
           </TouchableOpacity>
 
           <Text style={styles.label}>คำนำหน้า (ไทย)</Text>
-          <TextInput
-            style={styles.input}
-            value={form.titleTH}
-            onChangeText={(text) => handleChange("titleTH", text)}
-          />
+          <TouchableOpacity style={styles.input} onPress={() => setShowTitleModal(true)}>
+            <Text>{form.titleTH || "เลือกคำนำหน้า"}</Text>
+          </TouchableOpacity>
 
           <Text style={styles.label}>ชื่อ (ไทย)</Text>
           <TextInput
@@ -204,6 +201,32 @@ export default function RegisterScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal เลือกคำนำหน้า */}
+      <Modal visible={showTitleModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <FlatList
+              data={titleOptions}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.option}
+                  onPress={() => {
+                    handleChange("titleTH", item);
+                    setShowTitleModal(false);
+                  }}
+                >
+                  <Text>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity onPress={() => setShowTitleModal(false)} style={styles.closeModal}>
+              <Text style={{ color: "#dc3545" }}>❌ ปิด</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -222,13 +245,12 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 30,
-    marginTop: 30,
+    marginVertical: 30,
   },
   label: {
     fontSize: 16,
     marginTop: 10,
-    margin: 25,
+    marginHorizontal: 25,
   },
   input: {
     borderWidth: 1,
@@ -237,7 +259,8 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 16,
     marginTop: 5,
-    margin: 20,
+    marginHorizontal: 20,
+    backgroundColor: "#fff",
   },
   button: {
     backgroundColor: "#28a745",
@@ -245,13 +268,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 30,
     alignItems: "center",
+    marginHorizontal: 20,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-    margin: 5,
-    marginRight: 20,
   },
   loginContainer: {
     flexDirection: "row",
@@ -262,5 +284,27 @@ const styles = StyleSheet.create({
     color: "#007bff",
     marginLeft: 5,
     fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    width: "80%",
+    padding: 20,
+    maxHeight: "60%",
+  },
+  option: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  closeModal: {
+    marginTop: 10,
+    alignItems: "center",
   },
 });

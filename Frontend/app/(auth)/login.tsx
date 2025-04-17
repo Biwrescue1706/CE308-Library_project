@@ -20,11 +20,15 @@ export default function LoginScreen() {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!usernameOrEmail || !password) {
-      Alert.alert("กรุณากรอกชื่อผู้ใช้หรืออีเมล และรหัสผ่าน");
+    if (!usernameOrEmail) {
+      Alert.alert("กรุณากรอกอีเมลให้ถูกต้อง");
       return;
+    }
+    if (!password) {
+      Alert.alert("กรุณากรอกรหัสผ่านให้ถูกต้อง");
     }
 
     setLoading(true);
@@ -41,7 +45,7 @@ export default function LoginScreen() {
       Alert.alert(" เข้าสู่ระบบสำเร็จ");
 
       if (user.role === "admin") {
-        router.replace("./(tabs)/addBooks");
+        router.replace("/(tabs)/addBooks");
       } else {
         router.replace("/");
       }
@@ -71,13 +75,23 @@ export default function LoginScreen() {
         />
 
         <Text style={styles.label}>รหัสผ่าน</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="รหัสผ่าน"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+        <View style={{ position: "relative" }}>
+          <TextInput
+            style={styles.input}
+            placeholder="รหัสผ่าน"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.showPasswordToggle}
+          >
+            <Text style={{ color: "#007bff", fontWeight: "bold" }}>
+              {showPassword ? "ซ่อน" : "แสดง"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={styles.button}
@@ -160,4 +174,10 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontWeight: "bold",
   },
+  showPasswordToggle: {
+    position: "absolute",
+    right: 10,
+    top: 15,
+  },
+
 });

@@ -25,10 +25,8 @@ export default function AccountScreen() {
     axios
       .get(`${API_URL}/users/me`, { withCredentials: true })
       .then((response) => {
-        console.log("✅ /users/me response:", response.data);
         setUsers(response.data?.user || response.data);
         setLoading(false);
-        
         setRefreshing(false);
       })
       .catch((error) => {
@@ -47,20 +45,33 @@ export default function AccountScreen() {
     axios
       .post(`${API_URL}/users/logout`, {}, { withCredentials: true })
       .then(() => {
-        console.log("✅ Logout successful");
         setUsers(null);
         router.replace("/");
       })
       .catch((error) => console.error("❌ Error logging out:", error));
   };
 
+  // 📌 แปลงวันที่เป็นภาษาไทย + พ.ศ.
+  const formatThaiDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("th-TH", { month: "long" });
+    const year = date.getFullYear() + 543;
+    return `${day} ${month} ${year}`;
+  };
+
   return (
     <ScrollView
       contentContainerStyle={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
-        setRefreshing(true);
-        fetchUser();
-      }} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => {
+            setRefreshing(true);
+            fetchUser();
+          }}
+        />
+      }
     >
       <Text style={styles.header}>👤 บัญชีของฉัน</Text>
 
@@ -76,7 +87,7 @@ export default function AccountScreen() {
           <Text>📞 เบอร์โทร: {users.phone}</Text>
           <Text>
             📅 วันสมัครสมาชิก:{" "}
-            {new Date(users.registrationDate || users.createdAt).toLocaleDateString()}
+            {formatThaiDate(users.registrationDate || users.createdAt)}
           </Text>
 
           <TouchableOpacity

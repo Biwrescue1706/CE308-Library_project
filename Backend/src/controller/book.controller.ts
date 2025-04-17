@@ -16,15 +16,41 @@ const BookSchema = z.object({
 });
 
 // 📚 ดึงหนังสือทั้งหมด
-export const getBooks = async (req: Request, res: Response): Promise<void> => {
+export const getBooks = async (req: Request, res: Response) => {
   try {
-    const books = await BookService.getAllBooks();
+    const books = await prisma.book.findMany({
+      // select: {
+      //   id: true,
+      //   title: true,
+      //   author: true,
+      //   description: true,
+      //   category: true,
+      //   totalCopies: true,
+      //   availableCopies: true,
+      //   createdById: true,
+      //   updatedById: true,
+      // },
+      include: {
+        createdBy: {
+          select: {
+            username: true,
+          },
+        },
+        updatedBy: {
+          select: {
+            username: true,
+          },
+        },
+      },
+    });
+
     res.json(books);
-    return
-  } catch {
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงหนังสือทั้งหมด" });
+  } catch (error) {
+    console.error("❌ Error fetching books:", error);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลหนังสือ" });
   }
 };
+
 
 // 📚 ดึงหนังสือตาม ID
 export const getBook = async (req: Request, res: Response): Promise<void> => {

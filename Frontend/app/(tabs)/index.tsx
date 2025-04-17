@@ -150,22 +150,6 @@ export default function HomeScreen() {
                   {item.availableCopies > 0 ? "📖 ยืม" : "❌ หมด"}
                 </Text>
               </TouchableOpacity>
-              {userRole === "admin" && (
-                <>
-                  <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={() => handleEdit(item)}
-                  >
-                    <Text style={styles.buttonText}>✏️ แก้ไข</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDelete(item.id)}
-                  >
-                    <Text style={styles.buttonText}>🗑️ ลบ</Text>
-                  </TouchableOpacity>
-                </>
-              )}
             </View>
           </View>
         )}
