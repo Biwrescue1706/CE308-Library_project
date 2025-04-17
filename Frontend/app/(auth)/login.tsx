@@ -88,7 +88,7 @@ export default function LoginScreen() {
             style={styles.showPasswordToggle}
           >
             <Text style={{ color: "#007bff", fontWeight: "bold" }}>
-              {showPassword ? "ซ่อน" : "แสดง"}
+              {showPassword ? "🙈" : "👁️"}
             </Text>
           </TouchableOpacity>
         </View>

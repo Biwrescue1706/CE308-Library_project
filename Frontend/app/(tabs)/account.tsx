@@ -89,12 +89,17 @@ export default function AccountScreen() {
             📅 วันสมัครสมาชิก:{" "}
             {formatThaiDate(users.registrationDate || users.createdAt)}
           </Text>
-
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/account/profile")} // ← ปรับตาม path ที่คุณใช้จริง
+          >
+            <Text style={styles.buttonText}>📄 โปรไฟล์ของฉัน</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("/account/inforpersonal")}
           >
-            <Text style={styles.buttonText}>ข้อมูลส่วนตัว</Text>
+            <Text style={styles.buttonText}>✏️ แก้ไขข้อมูลส่วนตัว</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

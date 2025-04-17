@@ -136,82 +136,12 @@ export default function HomeScreen() {
 
             <View style={styles.buttonGroup}>
               <TouchableOpacity onPress={() => router.push(`./book/${item.id}`)}>
-                <Text style={{ color: "#007bff", marginTop: 10, textAlign: "center" }}>
-                  🔍 ดูรายละเอียด
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.borrowButton}
-                onPress={() => handleBorrow(item)}
-                disabled={item.availableCopies === 0}
-              >
-                <Text style={styles.buttonText}>
-                  {item.availableCopies > 0 ? "📖 ยืม" : "❌ หมด"}
-                </Text>
+                <Text style={styles.button}>🔍 ดูรายละเอียด</Text>
               </TouchableOpacity>
             </View>
           </View>
         )}
       />
-
-      <Modal visible={isModalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>📝 แก้ไขหนังสือ</Text>
-            <Text style={styles.inputLabel}>ชื่อหนังสือ : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="ชื่อหนังสือ"
-              value={selectedBook?.title || ""}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, title: text })}
-            />
-            <Text style={styles.inputLabel}> ผู้แต่ง : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="ผู้แต่ง"
-              value={selectedBook?.author || ""}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, author: text })}
-            />
-            <Text style={styles.inputLabel}> คำอธิบาย : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="คำอธิบาย"
-              value={selectedBook?.description || ""}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, description: text })}
-            />
-            <Text style={styles.inputLabel}> หมวดหมู่ : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="หมวดหมู่"
-              value={selectedBook?.category || ""}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, category: text })}
-            />
-            <Text style={styles.inputLabel}> จำนวนทั้งหมด : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="จำนวนทั้งหมด"
-              keyboardType="numeric"
-              value={selectedBook?.totalCopies?.toString() || ""}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, totalCopies: Number(text) })
-              }
-            />
-            <Text style={styles.inputLabel}> จำนวนหนังสือที่เหลือ : </Text>
-            <TextInput
-              style={styles.input}
-              placeholder="จำนวนหนังสือที่เหลือ"
-              keyboardType="numeric"
-              value={selectedBook?.availableCopies?.toString() || ""}
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, availableCopies: Number(text) })
-              }
-            />
-            <Button title="💾 บันทึก" onPress={handleUpdate} />
-            <Button title="❌ ยกเลิก" onPress={closeModal} />
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -227,6 +157,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
+    backgroundColor: "#D0E8FF", // 🎨 พื้นหลังสีฟ้าอ่อน
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
   },
   bookContainer: {
     backgroundColor: "#f8f9fa",
@@ -246,11 +180,11 @@ const styles = StyleSheet.create({
   },
   buttonGroup: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center", 
     marginTop: 10,
   },
   borrowButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#",
     padding: 10,
     borderRadius: 5,
     flex: 1,
@@ -263,14 +197,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flex: 1,
     marginRight: 5,
-    alignItems: "center",
-  },
-  deleteButton: {
-    backgroundColor: "#ff4d4d",
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-    marginLeft: 5,
     alignItems: "center",
   },
   buttonText: {
@@ -307,6 +233,15 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     borderWidth: 1,
     borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  button: {
+    fontSize: 16,
+    fontWeight: "bold",
+    backgroundColor: "#dc3545",
+    color: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderRadius: 5,
   },
 });
