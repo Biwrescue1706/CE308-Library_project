@@ -12,7 +12,7 @@ export const getCartItems = async (req: Request, res: Response) => {
 
 export const addToCart = async (req: Request, res: Response) => {
   const user = (req as any).user;
-  const { bookId } = req.body;
+  const { bookId, quantity } = req.body;
 
   const existing = await prisma.cart.findFirst({
     where: { userId: user.id, bookId },
@@ -24,11 +24,16 @@ export const addToCart = async (req: Request, res: Response) => {
   }
 
   const item = await prisma.cart.create({
-    data: { userId: user.id, bookId },
+    data: {
+      userId: user.id,
+      bookId,
+      quantity: quantity ?? 1, // ✅ ถ้าไม่มี quantity ให้ default = 1
+    },
   });
 
   res.status(201).json(item);
 };
+
 
 export const removeFromCart = async (req: Request, res: Response) => {
   const user = (req as any).user;

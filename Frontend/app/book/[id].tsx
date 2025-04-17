@@ -1,6 +1,13 @@
-// 📁 app/book/[id].tsx
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, Button, Alert } from "react-native";
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+  Button,
+  Alert,
+  TextInput,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -12,6 +19,7 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState("1"); // เพิ่ม state
 
   useEffect(() => {
     if (!id) return;
@@ -27,6 +35,22 @@ export default function BookDetailScreen() {
         Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลหนังสือได้");
       });
   }, [id]);
+
+  const handleAddToCart = () => {
+    axios
+      .post(
+        `${API_URL}/cart/add`,
+        { bookId: book.id, quantity: parseInt(quantity) },
+        { withCredentials: true } // ✅ สำคัญมาก
+      )
+      .then(() => {
+        Alert.alert("✅ เพิ่มเข้าตะกร้าสำเร็จ");
+      })
+      .catch((err) => {
+        console.error("❌ เพิ่มเข้าตะกร้าไม่สำเร็จ:", err);
+        Alert.alert("ไม่สามารถเพิ่มเข้าตะกร้าได้");
+      });
+  };
 
   const handleBorrow = () => {
     if (!book || book.availableCopies <= 0) {
@@ -71,13 +95,34 @@ export default function BookDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📖 {book.title}</Text>
-      <Text style={styles.detail}>ผู้แต่ง: {book.author}</Text>
-      <Text style={styles.detail}>หมวดหมู่: {book.category}</Text>
-      <Text style={styles.detail}>คำอธิบาย: {book.description}</Text>
-      <Text style={styles.detail}>จำนวนที่เหลือ: {book.availableCopies}</Text>
+      <View style={styles.card}>
+        <Text style={styles.title}>📖 {book.title}</Text>
+        <Text style={styles.detail}>ผู้แต่ง: {book.author}</Text>
+        <Text style={styles.detail}>หมวดหมู่: {book.category}</Text>
+        <Text style={styles.detail}>คำอธิบาย: {book.description}</Text>
+        <Text style={styles.detail}>จำนวนที่เหลือ: {book.availableCopies}</Text>
 
-      <Button title="📚 ยืมหนังสือ" onPress={handleBorrow} disabled={book.availableCopies <= 0} />
+        <TextInput
+          style={styles.input}
+          value={quantity}
+          onChangeText={setQuantity}
+          placeholder="จำนวนที่ต้องการ"
+          keyboardType="numeric"
+        />
+
+        <Button
+          title="🛒 เพิ่มเข้าตะกร้า"
+          onPress={handleAddToCart}
+        />
+
+        <View style={{ height: 10 }} />
+
+        <Button
+          title="📚 ยืมหนังสือ"
+          onPress={handleBorrow}
+          disabled={book.availableCopies <= 0}
+        />
+      </View>
     </View>
   );
 }
@@ -87,19 +132,44 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#C8E6B2",
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    padding: 20,
+    borderRadius: 16,
+    width: "100%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
   },
   title: {
     fontSize: 26,
     fontWeight: "bold",
     marginBottom: 10,
+    textAlign: "center",
   },
   detail: {
     fontSize: 16,
     marginBottom: 8,
+    textAlign: "center",
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#C8E6B2",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 10,
+    backgroundColor: "#fff",
   },
 });

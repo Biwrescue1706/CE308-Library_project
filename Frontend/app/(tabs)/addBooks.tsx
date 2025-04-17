@@ -41,7 +41,7 @@ export default function AddBooksScreen() {
 
         if (user.role !== "admin") {
           Alert.alert("🚫 คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
-          router.replace("/(auth)/login");
+          router.replace("/");
         } else {
           setUserId(user.id);
           await fetchBooks();
