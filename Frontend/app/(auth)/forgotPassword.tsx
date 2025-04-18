@@ -28,9 +28,11 @@ export default function ForgotPasswordScreen() {
 
         try {
             setLoading(true);
-            const res = await axios.post(`${API_URL}/users/forgot-password`, {
-                usernameOrEmail: input,
-            });
+            const res = await axios
+                .post(`${API_URL}/users/forgot-password`, 
+                    {usernameOrEmail: input,},
+                    { withCredentials: true }
+                );
 
             const { userId } = res.data;
 

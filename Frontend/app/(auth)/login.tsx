@@ -34,10 +34,11 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API_URL}/users/login`, {
-        usernameOrEmail,
-        password
-      });
+      const res = await axios
+        .post(`${API_URL}/users/login`,
+          {usernameOrEmail, password},
+          { withCredentials: true }
+        );
 
       const { user } = res.data;
       console.log("เข้าสู่ระบบแล้ว:", user);
