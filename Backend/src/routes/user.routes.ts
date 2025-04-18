@@ -26,4 +26,14 @@ router.get("/me", authenticate, UserController.getMe);
 // ✅ ประวัติการยืมหนังสือของผู้ใช้ที่ login
 router.get("/history", authenticate, UserController.getHistory);
 
+// ✅ ลืมรหัสผ่าน
+router.post("/forgot-password", UserController.forgotPassword);
+
+
+// ✅ ตั้งรหัสผ่านใหม่
+router.post("/reset-password", UserController.resetPassword);
+
+// ✅ เปลี่ยนรหัสผ่านขณะ login
+router.post("/change-password", authenticate, UserController.changePassword);
+
 export default router;

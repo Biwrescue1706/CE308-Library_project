@@ -157,3 +157,39 @@ export const getHistory = async (req: Request, res: Response) => {
     res.status(500).json({ error: "ไม่สามารถดึงประวัติการยืมได้" });
   }
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  const { usernameOrEmail } = req.body;
+  const user = await UserService.findUserByUsernameOrEmail(usernameOrEmail);
+
+  if (!user) {
+    res.status(404).json({ message: "ไม่พบผู้ใช้งาน" });
+    return;
+  }
+
+  res.status(200).json({ message: "พบผู้ใช้งาน", userId: user.id });
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const { userId, newPassword } = req.body;
+  const updated = await UserService.resetUserPassword(userId, newPassword);
+  if (!updated) {
+    res.status(400).json({ message: "เปลี่ยนรหัสผ่านไม่สำเร็จ" });
+    return;
+  }
+  res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+};
+
+export const changePassword = async (req: Request, res: Response): Promise<void> => {
+  const { username } = req.user as { username: string };
+  const { oldPassword, newPassword } = req.body;
+
+  const updated = await UserService.changeUserPassword(username, oldPassword, newPassword);
+
+  if (!updated) {
+    res.status(400).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
+    return;
+  }
+
+  res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+};

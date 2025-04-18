@@ -94,3 +94,32 @@ export const getUserByIdWithProfile = async (userId: string) => {
   });
 };
 
+export const findUserByUsernameOrEmail = async (usernameOrEmail: string) => {
+  return await prisma.user.findFirst({
+    where: {
+      OR: [
+        { username: usernameOrEmail },
+        { email: usernameOrEmail }
+      ]
+    },
+  });
+};
+
+export const resetUserPassword = async (userId: string, newPassword: string) => {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { password: newPassword },
+  });
+  return !!user;
+};
+
+export const changeUserPassword = async (username: string, oldPassword: string, newPassword: string) => {
+  const user = await prisma.user.findUnique({ where: { username } });
+  if (!user || user.password !== oldPassword) return false;
+
+  await prisma.user.update({
+    where: { username },
+    data: { password: newPassword },
+  });
+  return true;
+};

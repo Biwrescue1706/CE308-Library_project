@@ -1,10 +1,11 @@
-import { Request } from "express";
+import "express";
 
 declare module "express" {
   export interface Request {
     user?: {
-      userId: string;
-      role: string;
+      id: string;
+      username: string;
+      role: "admin" | "user";
     };
   }
 }
