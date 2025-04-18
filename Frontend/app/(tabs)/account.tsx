@@ -81,21 +81,24 @@ export default function AccountScreen() {
         />
       }
     >
-      <Text style={styles.header}>👤 บัญชีของฉัน</Text>
 
       {loading ? (
         <ActivityIndicator size="large" color="tomato" />
       ) : users ? (
         <>
-          <Text>📧 อีเมล: {users.email}</Text>
-          <Text>🆔 รหัสสมาชิก: {users.memberId}</Text>
-          <Text>👤 ชื่อใช้งาน : {users.username}</Text>
-          <Text>👤 ชื่อ ภาษาไทย: {users.titleTH} {users.firstNameTH} {users.lastNameTH}</Text>
-          <Text>📞 เบอร์โทร: {users.phone}</Text>
-          <Text>
-            📅 วันสมัครสมาชิก:{" "}
-            {formatThaiDate(users.registrationDate || users.createdAt)}
-          </Text>
+          <Text style={styles.header}>👤 บัญชีของฉัน</Text>
+          <View style={styles.userInfoBox}>
+            <Text style={styles.infoText}>📧 อีเมล: {users.email}</Text>
+            <Text style={styles.infoText}>🆔 รหัสสมาชิก: {users.memberId}</Text>
+            <Text style={styles.infoText}>👤 ชื่อใช้งาน : {users.username}</Text>
+            <Text style={styles.infoText}>
+              👤 ชื่อ ภาษาไทย: {users.titleTH} {users.firstNameTH} {users.lastNameTH}
+            </Text>
+            <Text style={styles.infoText}>📞 เบอร์โทร: {users.phone}</Text>
+            <Text style={styles.infoText}>
+              📅 วันสมัครสมาชิก: {formatThaiDate(users.registrationDate || users.createdAt)}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("/account/profile")} // ← ปรับตาม path ที่คุณใช้จริง
@@ -108,7 +111,7 @@ export default function AccountScreen() {
           >
             <Text style={styles.buttonText}>✏️ แก้ไขข้อมูลส่วนตัว</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => router.push("/account/changePassword")}
@@ -149,7 +152,10 @@ export default function AccountScreen() {
           </TouchableOpacity>
         </>
       ) : (
-        <Text>⛔ ไม่พบข้อมูลผู้ใช้</Text>
+        <View style={styles.container}>
+          <Text style={styles.header}>👤 บัญชีของฉัน</Text>
+          <Text>⛔ ไม่พบข้อมูลผู้ใช้</Text>
+        </View>
       )}
     </ScrollView>
   );
@@ -164,10 +170,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   header: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    shadowColor: "#000",
+    width: "100%",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   button: {
     backgroundColor: "#007bff",
@@ -185,5 +199,28 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#dc3545",
+  },
+  userInfoBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    width: "100%",
+    marginVertical: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  loginButton: {
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    alignItems: "center",
   },
 });

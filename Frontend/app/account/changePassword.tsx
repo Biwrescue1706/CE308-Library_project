@@ -2,12 +2,18 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function ChangePasswordScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showpassword, setShowPassword] = useState(false);
+
+   const router = useRouter();
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -24,6 +30,7 @@ export default function ChangePasswordScreen() {
       Alert.alert("สำเร็จ", "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว");
       setNewPassword("");
       setConfirmPassword("");
+      router.replace("/(auth)/login");
     } catch (err) {
       Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถเปลี่ยนรหัสผ่านได้");
     }

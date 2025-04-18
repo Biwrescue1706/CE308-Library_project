@@ -26,13 +26,16 @@ router.get("/me", authenticate, UserController.getMe);
 // ✅ ประวัติการยืมหนังสือของผู้ใช้ที่ login
 router.get("/history", authenticate, UserController.getHistory);
 
+// ✅ แอดมินดึงผู้ใช้ทั้งหมด
+router.get("/admin/all-users", authenticate, UserController.getAllUsers);
+
 // ✅ ลืมรหัสผ่าน
 router.post("/forgot-password", UserController.forgotPassword);
 
-// ✅ ตั้งรหัสผ่านใหม่
+// ✅ ตั้งรหัสผ่านใหม่ (reset จากลิงก์)
 router.post("/reset-password", UserController.resetPassword);
 
-// ✅ เปลี่ยนรหัสผ่านขณะ login
+// ✅ เปลี่ยนรหัสผ่าน (ต้อง login แล้ว)
 router.post("/change-password", authenticate, UserController.changePassword);
 
 export default router;

@@ -42,19 +42,13 @@ export default function LoginScreen() {
       const { user } = res.data;
       console.log("เข้าสู่ระบบแล้ว:", user);
 
-      Alert.alert(" เข้าสู่ระบบสำเร็จ");
-
       if (user.role === "admin") {
         router.replace("/(tabs)/account");
       } else {
-        router.replace("/(tabs)/account");
+        router.replace("/");
       }
     } catch (err: any) {
       console.error(" Login error:", err.response?.data || err.message);
-      Alert.alert(
-        " เข้าสู่ระบบล้มเหลว",
-        err.response?.data?.error || "โปรดลองใหม่"
-      );
     } finally {
       setLoading(false);
     }
@@ -111,6 +105,17 @@ export default function LoginScreen() {
             <Text style={styles.registerText}>สมัครสมาชิก</Text>
           </TouchableOpacity>
         </View>
+
+        <View style={styles.forgotPasswordContainer}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push("/(auth)/forgotPassword")}
+            style={{ marginTop: 10 }}>
+            <Text style={styles.forgotPassword}>ฉันลืมรหัสผ่าน</Text>
+          </TouchableOpacity>
+        </View>
+
+
       </View>
     </View>
   );
@@ -172,6 +177,14 @@ const styles = StyleSheet.create({
   registerText: {
     color: "#007bff",
     marginLeft: 5,
+    fontWeight: "bold",
+  },
+  forgotPasswordContainer: {
+    alignItems: "center",
+    marginTop: 15,
+  },
+  forgotPassword: {
+    color: "#007bff",
     fontWeight: "bold",
   },
   showPasswordToggle: {

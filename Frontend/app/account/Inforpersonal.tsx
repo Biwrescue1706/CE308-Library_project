@@ -74,7 +74,6 @@ export default function Inforpersonal() {
   const [saving, setSaving] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTitleTHModal, setShowTitleTHModal] = useState(false);
-  const [showTitleENModal, setShowTitleENModal] = useState(false);
 
   const router = useRouter();
 

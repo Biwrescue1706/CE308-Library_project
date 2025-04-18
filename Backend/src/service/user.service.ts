@@ -105,14 +105,16 @@ export const findUserByUsernameOrEmail = async (usernameOrEmail: string) => {
   });
 };
 
-export const resetUserPassword = async (userId: string, newPassword: string) => {
-  const user = await prisma.user.update({
-    where: { id: userId },
-    data: { password: newPassword },
-  });
-  return !!user;
-};
+export const resetUserPassword = async (userId: string, newPassword: string): Promise<boolean> => {
+  const hashedPassword = await bcrypt.hash(newPassword, 10); // 👉 hash ด้วย bcrypt
 
+  const result = await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedPassword },
+  });
+
+  return !!result;
+};
 export const changeUserPassword = async (username: string, oldPassword: string, newPassword: string) => {
   const user = await prisma.user.findUnique({ where: { username } });
   if (!user || user.password !== oldPassword) return false;
@@ -122,4 +124,19 @@ export const changeUserPassword = async (username: string, oldPassword: string, 
     data: { password: newPassword },
   });
   return true;
+};
+
+export const getAllUsers = async () => {
+  return await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true,
+      password: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };

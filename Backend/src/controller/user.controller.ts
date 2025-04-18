@@ -181,14 +181,31 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 };
 
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
-  const { username, oldPassword, newPassword } = req.body;
+  const { newPassword } = req.body;
+  const userId = (req as any).user.id;
 
-  const updated = await UserService.changeUserPassword(username, oldPassword, newPassword);
-
+  const updated = await UserService.resetUserPassword(userId, newPassword);
   if (!updated) {
-    res.status(400).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
+    res.status(400).json({ message: "ไม่สามารถเปลี่ยนรหัสผ่านได้" });
     return;
   }
 
   res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+};
+
+export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const role = (req as any).user?.role;
+
+    if (role !== "admin") {
+      res.status(403).json({ error: "ไม่ได้รับอนุญาต" });
+      return;
+    }
+
+    const users = await UserService.getAllUsers();
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("❌ Error fetching all users:", err);
+    res.status(500).json({ error: "ไม่สามารถดึงข้อมูลผู้ใช้ได้" });
+  }
 };

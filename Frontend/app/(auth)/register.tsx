@@ -117,8 +117,6 @@ export default function RegisterScreen() {
         phone,
         role: "user",
       });
-
-      Alert.alert("✅ สมัครสมาชิกสำเร็จ", "กรุณาเข้าสู่ระบบ");
       router.replace("/login");
     } catch (error: any) {
       console.error("❌ Register error:", error.response?.data || error.message);
