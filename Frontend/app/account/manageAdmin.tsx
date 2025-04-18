@@ -23,12 +23,27 @@ export default function ManageAdminScreen() {
                 <Text style={styles.buttonText}>📚 จัดการหนังสือ</Text>
             </TouchableOpacity>
 
-            {/* <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/account/loansReport")}
-      >
-        <Text style={styles.buttonText}>📄 รายงานการยืมหนังสือ</Text>
-      </TouchableOpacity> */}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/manageAdmin/allLoans")}
+            >
+                <Text style={styles.buttonText}>ดูรายการการยืมทั้งหมด</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/manageAdmin/activeLoans")}
+            >
+                <Text style={styles.buttonText}>ดูรายการที่ยังไม่คืน</Text>
+            </TouchableOpacity>     
+
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/manageAdmin/overdueLoans")}
+            >
+                <Text style={styles.buttonText}>ดูรายการที่ค้างคืน (เกินกำหนด)</Text>
+            </TouchableOpacity>
+
         </ScrollView>
     );
 }
@@ -44,7 +59,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: "bold",
         marginVertical: 20,
-        marginTop:20,
+        marginTop: 20,
         backgroundColor: "#fff",
         width: 320,
         height: 50,
