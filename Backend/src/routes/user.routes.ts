@@ -29,7 +29,6 @@ router.get("/history", authenticate, UserController.getHistory);
 // ✅ ลืมรหัสผ่าน
 router.post("/forgot-password", UserController.forgotPassword);
 
-
 // ✅ ตั้งรหัสผ่านใหม่
 router.post("/reset-password", UserController.resetPassword);
 
