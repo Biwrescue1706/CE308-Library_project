@@ -181,15 +181,16 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 };
 
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
-  const { username } = req.user as { username: string };
-  const { oldPassword, newPassword } = req.body;
-
+  const {username , oldPassword, newPassword } = req.body;
+  
   const updated = await UserService.changeUserPassword(username, oldPassword, newPassword);
-
   if (!updated) {
-    res.status(400).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
-    return;
+     res.status(400).json({ message: "รหัสผ่านเดิมไม่ถูกต้อง" });
+     return
+  }
+  else {
+     res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+     return
   }
 
-  res.status(200).json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
 };
