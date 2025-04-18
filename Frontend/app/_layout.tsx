@@ -16,12 +16,19 @@ export default function RootLayout() {
       <Stack.Screen name="(auth)/forgotPassword" options={{ headerShown: false }} />
 
       {/* account */}
-      <Stack.Screen name="account/profile" options={{ headerShown: false }} />
+      
       <Stack.Screen name="account/contact" options={{ headerShown: false }} />
       <Stack.Screen name="account/changePassword" options={{ headerShown: false }} />
-      <Stack.Screen name="account/inforpersonal" options={{ headerShown: false }} />
-      <Stack.Screen name="account/addBooks" options={{ headerShown: false }} />
-      <Stack.Screen name="account/manageusers" options={{ headerShown: false }} />
+      <Stack.Screen name="account/manageAdmin" options={{ headerShown: false }} />
+      <Stack.Screen name="account/manageProfile" options={{ headerShown: false }} />
+
+      {/* manageProfile */}
+      <Stack.Screen name="manageProfile/inforpersonal" options={{ headerShown: false }} />
+      <Stack.Screen name="manageProfile/profile" options={{ headerShown: false }} />
+      
+      {/* manageAdmin */}
+      <Stack.Screen name="manageAdmin/addBooks" options={{ headerShown: false }} />
+      <Stack.Screen name="manageAdmin/manageusers" options={{ headerShown: false }} />
 
       {/* book */}
       <Stack.Screen name="book/[id]" options={{ headerShown: false }} />

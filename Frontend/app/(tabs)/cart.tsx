@@ -28,7 +28,7 @@ export default function CartScreen() {
       .get(`${API_URL}/users/me`, { withCredentials: true })
       .then(() => {
         setIsLoggedIn(true);
-        return axios.get(`${API_URL}/cart`, { withCredentials: true });
+        return axios.get(`${API_URL}/cart/cart`, { withCredentials: true });
       })
       .then((res) => {
         setItems(res.data);
