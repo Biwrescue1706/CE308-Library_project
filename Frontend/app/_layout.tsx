@@ -29,7 +29,10 @@ export default function RootLayout() {
       {/* manageAdmin */}
       <Stack.Screen name="manageAdmin/addBooks" options={{ headerShown: false }} />
       <Stack.Screen name="manageAdmin/manageusers" options={{ headerShown: false }} />
-
+      <Stack.Screen name="manageAdmin/allLoans" options={{ headerShown: false }} />
+      <Stack.Screen name="manageAdmin/activeLoans" options={{ headerShown: false }} />
+      <Stack.Screen name="manageAdmin/overdueLoans" options={{ headerShown: false }} />
+      
       {/* book */}
       <Stack.Screen name="book/[id]" options={{ headerShown: false }} />
       {/* Error Page สำหรับหน้าไม่พบ */}

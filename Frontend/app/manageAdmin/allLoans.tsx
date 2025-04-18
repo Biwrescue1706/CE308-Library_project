@@ -42,8 +42,17 @@ export default function AllLoansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: "#C8E6B2" },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  container: {
+    padding: 20,
+    backgroundColor: "#C8E6B2",
+    flex: 1
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center"
+  },
   card: {
     backgroundColor: "#fff",
     padding: 16,
