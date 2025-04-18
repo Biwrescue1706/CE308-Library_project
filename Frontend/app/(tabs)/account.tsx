@@ -99,18 +99,24 @@ export default function AccountScreen() {
               📅 วันสมัครสมาชิก: {formatThaiDate(users.registrationDate || users.createdAt)}
             </Text>
           </View>
+
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("/account/profile")} // ← ปรับตาม path ที่คุณใช้จริง
+            onPress={() => router.push("/account/manageProfile")} // ← ปรับตาม path ที่คุณใช้จริง
           >
-            <Text style={styles.buttonText}>📄 โปรไฟล์ของฉัน</Text>
+            <Text style={styles.buttonText}>📄 จัดการโปรไฟล์ของฉัน</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => router.push("/account/inforpersonal")}
-          >
-            <Text style={styles.buttonText}>✏️ แก้ไขข้อมูลส่วนตัว</Text>
-          </TouchableOpacity>
+
+          {users?.role === "admin" && (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/account/manageAdmin")}
+              >
+                <Text style={styles.buttonText}>ระบบจัดการของ Admin</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
           <TouchableOpacity
             style={styles.button}
@@ -118,24 +124,6 @@ export default function AccountScreen() {
           >
             <Text style={styles.buttonText}>🔒 เปลี่ยนรหัสผ่าน</Text>
           </TouchableOpacity>
-
-          {users?.role === "admin" && (
-            <>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("/account/addBooks")}
-              >
-                <Text style={styles.buttonText}>📚 จัดการหนังสือ</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("/account/manageusers")}
-              >
-                <Text style={styles.buttonText}>👥 จัดการสมาชิก</Text>
-              </TouchableOpacity>
-            </>
-          )}
 
           <TouchableOpacity
             style={styles.button}

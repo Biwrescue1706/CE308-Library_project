@@ -108,9 +108,9 @@ export default function ManageUsersScreen() {
       );
 
       setModalVisible(false);
+      Alert.alert("✅ สำเร็จ", "บันทึกข้อมูลเรียบร้อยแล้ว");
     } catch (err) {
-      console.error("❌ Error updating user:", err);
-      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตข้อมูลได้");
+      Alert.alert("❌ เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตข้อมูลได้");
     }
   };
 
