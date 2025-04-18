@@ -67,9 +67,11 @@ model Loan {
   id         String    @id @default(uuid())
   userId     String // รหัสผู้ใช้งาน
   bookId     String // รหัสหนังสือ
-  quantity   Int       @default(1) 
+  quantity   Int       @default(1)
   loanDate   DateTime  @default(now()) // วันที่ยืม
-  returnDate DateTime? // วันที่คืน
+  dueDate    DateTime? // วันที่กำหนดคืน
+  returnDate DateTime? // วันที่คืนจริง
+  lateDays   Int? // จำนวนวันที่คืนล่าช้า
   returned   Boolean   @default(false) // สถานะการคืนหนังสือ
   createdAt  DateTime  @default(now())
   updateAt   DateTime  @updatedAt
@@ -81,7 +83,7 @@ model Cart {
   id        String   @id @default(uuid())
   userId    String // รหัสผู้ใช้งาน
   bookId    String // รหัสหนังสือ  
-  quantity  Int      @default(1) 
+  quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
   user      User     @relation(fields: [userId], references: [id])
