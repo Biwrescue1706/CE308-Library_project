@@ -72,7 +72,16 @@ export default function AddBooksScreen() {
   };
 
   const handleChange = (key: string, value: string) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((prev) => {
+      if (key === "totalCopies" && !isEditMode) {
+        return {
+          ...prev,
+          [key]: value,
+          availableCopies: value,
+        };
+      }
+      return { ...prev, [key]: value };
+    });
   };
 
   const handleSaveBook = async () => {
@@ -109,7 +118,7 @@ export default function AddBooksScreen() {
             description,
             category,
             totalCopies: parseInt(totalCopies),
-            availableCopies: parseInt(availableCopies),
+            availableCopies: parseInt(totalCopies),
             createdById: userId,
           },
           { headers: { Authorization: `Bearer ${token}` } }
@@ -243,30 +252,25 @@ export default function AddBooksScreen() {
             {isEditMode ? "✏️ แก้ไขหนังสือ" : "📖 เพิ่มหนังสือ"}
           </Text>
 
-          {[
-            "title",
-            "author",
-            "description",
-            "category",
-            "totalCopies",
-            "availableCopies",
-          ].map((key) => (
-            <View key={key}>
-              <Text style={styles.label}>{getLabel(key)}</Text>
-              <TextInput
-                style={styles.input}
-                value={form[key as keyof typeof form]}
-                onChangeText={(text) => handleChange(key, text)}
-                keyboardType={
-                  key === "totalCopies" || key === "availableCopies"
-                    ? "numeric"
-                    : "default"
-                }
-                multiline={key === "description"}
-                numberOfLines={key === "description" ? 4 : 1}
-              />
-            </View>
-          ))}
+          {["title", "author", "description", "category", "totalCopies"]
+            .concat(isEditMode ? ["availableCopies"] : [])
+            .map((key) => (
+              <View key={key}>
+                <Text style={styles.label}>{getLabel(key)}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={form[key as keyof typeof form]}
+                  onChangeText={(text) => handleChange(key, text)}
+                  keyboardType={
+                    key === "totalCopies" || key === "availableCopies"
+                      ? "numeric"
+                      : "default"
+                  }
+                  multiline={key === "description"}
+                  numberOfLines={key === "description" ? 4 : 1}
+                />
+              </View>
+            ))}
 
           <TouchableOpacity style={styles.button} onPress={handleSaveBook}>
             <Text style={styles.buttonText}>💾 บันทึก</Text>
@@ -346,7 +350,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   tableHeader: {
-    marginTop : 20 ,
+    marginTop: 20,
     flexDirection: "row",
     backgroundColor: "#fff",
     borderTopWidth: 1,

@@ -82,7 +82,7 @@ export default function SearchScreen() {
       />
 
       <FlatList
-        data={filteredBooks}
+        data={filteredBooks.slice(0, 10)}
         keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchBooks} />}
         renderItem={({ item }) => (
