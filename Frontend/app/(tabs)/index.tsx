@@ -7,9 +7,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
-  Modal,
-  TextInput,
-  Alert,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -21,9 +18,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [books, setBooks] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [userRole, setUserRole] = useState<string>("");
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchBooks = () => {
     axios
@@ -38,95 +34,39 @@ export default function HomeScreen() {
     }, [])
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      axios
-        .get(`${API_URL}/users/me`, { withCredentials: true })
-        .then((res) => setUserRole(res.data.user.role))
-        .catch((err) => {
-          console.log("🔒 ไม่พบ session:", err.response?.status);
-          setUserRole("");
-          router.replace("/");
-        });
-    }, [])
-  );
-
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchBooks();
     setTimeout(() => setRefreshing(false), 1000);
   }, []);
 
-  const handleDelete = (id: string) => {
-    Alert.alert("ยืนยัน", "คุณต้องการลบหนังสือนี้ใช่หรือไม่?", [
-      { text: "ยกเลิก" },
-      {
-        text: "ลบ",
-        style: "destructive",
-        onPress: () => {
-          axios
-            .delete(`${API_URL}/books/deleteBooks/${id}`, { withCredentials: true })
-            .then(() => {
-              setBooks((prev) => prev.filter((b) => b.id !== id));
-            })
-            .catch((err) => console.error("❌ ลบหนังสือผิดพลาด:", err));
-        },
-      },
-    ]);
-  };
-
-  const handleEdit = (book: any) => {
-    setSelectedBook({ ...book });
-    setModalVisible(true);
-  };
-
-  const handleUpdate = () => {
-    if (selectedBook) {
-      const updateData = {
-        title: selectedBook.title,
-        author: selectedBook.author,
-        description: selectedBook.description,
-        category: selectedBook.category,
-        totalCopies: Number(selectedBook.totalCopies),
-        availableCopies: Number(selectedBook.availableCopies),
-      };
-
-      axios
-        .put(`${API_URL}/books/editBooks/${selectedBook.id}`, updateData, {
-          withCredentials: true,
-        })
-        .then(() => {
-          setBooks((prev) =>
-            prev.map((b) => (b.id === selectedBook.id ? selectedBook : b))
-          );
-          setModalVisible(false);
-        })
-        .catch((err) => console.error("❌ แก้ไขผิดพลาด:", err));
-    }
-  };
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const paginatedBooks = books.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>📚 รายการหนังสือ</Text>
 
       <FlatList
-        data={[...books].sort((a, b) =>
-          a.title.localeCompare(b.title) || a.availableCopies - b.availableCopies
-        )}
+        data={paginatedBooks}
         keyExtractor={(item) => item.id}
         numColumns={2}
         columnWrapperStyle={{ justifyContent: "space-between" }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={({ item }) => (
           <View style={styles.bookContainer}>
             <Text style={styles.bookTitle}>📖 {item.title}</Text>
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>หมวดหมู่หนังสือ: </Text>{item.category}
+              <Text style={styles.bold}>หมวดหมู่:</Text> {item.category}
             </Text>
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>จำนวนที่เหลือ: </Text>{item.availableCopies} <Text style={styles.bold}>เล่ม</Text>
+              <Text style={styles.bold}>เหลือ:</Text> {item.availableCopies} เล่ม
             </Text>
-
             <TouchableOpacity
               style={styles.detailButton}
               onPress={() => router.push(`./book/${item.id}`)}
@@ -137,54 +77,37 @@ export default function HomeScreen() {
         )}
       />
 
-      {/* Modal แก้ไข */}
-      <Modal visible={isModalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>แก้ไขหนังสือ</Text>
+      {totalPages > 1 && (
+        <View style={styles.paginationContainer}>
+          <TouchableOpacity
+            onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            style={[
+              styles.pageButton,
+              currentPage === 1 && styles.pageButtonDisabled,
+            ]}
+          >
+            <Text style={styles.pageText}>⬅️ ก่อนหน้า</Text>
+          </TouchableOpacity>
 
-            <TextInput
-              style={styles.input}
-              value={selectedBook?.title}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, title: text })}
-              placeholder="ชื่อหนังสือ"
-            />
-            <TextInput
-              style={styles.input}
-              value={selectedBook?.author}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, author: text })}
-              placeholder="ผู้แต่ง"
-            />
-            <TextInput
-              style={styles.input}
-              value={selectedBook?.category}
-              onChangeText={(text) => setSelectedBook({ ...selectedBook, category: text })}
-              placeholder="หมวดหมู่"
-            />
-            <TextInput
-              style={styles.input}
-              value={selectedBook?.availableCopies?.toString()}
-              keyboardType="numeric"
-              onChangeText={(text) =>
-                setSelectedBook({ ...selectedBook, availableCopies: parseInt(text) })
-              }
-              placeholder="จำนวนที่เหลือ"
-            />
+          <Text style={styles.pageNumber}>
+            หน้า {currentPage} / {totalPages}
+          </Text>
 
-            <View style={{ flexDirection: "row", marginTop: 10 }}>
-              <TouchableOpacity style={styles.modalSave} onPress={handleUpdate}>
-                <Text style={styles.buttonText}>💾 บันทึก</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalSave, { backgroundColor: "#888" }]}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.buttonText}>❌ ยกเลิก</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <TouchableOpacity
+            onPress={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            style={[
+              styles.pageButton,
+              currentPage === totalPages && styles.pageButtonDisabled,
+            ]}
+          >
+            <Text style={styles.pageText}>ถัดไป ➡️</Text>
+          </TouchableOpacity>
         </View>
-      </Modal>
+      )}
     </View>
   );
 }
@@ -234,60 +157,27 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  adminButtons: {
+  paginationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 10,
   },
-  editButton: {
-    backgroundColor: "#ffc107",
-    flex: 1,
-    marginRight: 5,
-    borderRadius: 5,
-    alignItems: "center",
-    padding: 8,
+  pageButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "#007bff",
+    borderRadius: 8,
   },
-  deleteButton: {
-    backgroundColor: "#dc3545",
-    flex: 1,
-    borderRadius: 5,
-    alignItems: "center",
-    padding: 8,
+  pageButtonDisabled: {
+    backgroundColor: "#ccc",
   },
-  buttonText: {
+  pageText: {
     color: "#fff",
     fontWeight: "bold",
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    width: "85%",
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
+  pageNumber: {
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 15,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-  },
-  modalSave: {
-    flex: 1,
-    backgroundColor: "#28a745",
-    marginHorizontal: 5,
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
   },
 });

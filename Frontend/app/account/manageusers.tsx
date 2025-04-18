@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     margin: 10,
     height: 50,
-    width: 100,
+    width: 300,
   },
   tableHeader: {
     flexDirection: "row",
