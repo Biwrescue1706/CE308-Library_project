@@ -89,7 +89,7 @@ export default function ProfileScreen() {
 
                 <Text style={styles.label}>ที่อยู่ :</Text>
                 <Text style={styles.value}>
-                    บ้านเลขที่ : {user?.houseNumber} หมู่ที่ : {user?.villageNo} ซอย : {user?.alley} ถนน  : {user?.street} ตำบล/แขวง : {user?.subDistrict} อำเภอ/เขต : {user?.district} จังหวัด : {user?.province} รหัสไปรษณีย์ : {user?.postalCode}
+                    บ้านเลขที่ : {user?.houseNumber} หมู่ที่ : {user?.villageNo} ซอย : {user?.alley} ถนน  : {user?.street}  ตำบล/แขวง : {user?.subdistrict} อำเภอ/เขต : {user?.district} จังหวัด : {user?.province} รหัสไปรษณีย์ : {user?.postalCode}
                 </Text>
 
                 <Text style={styles.label}>วันสมัครสมัครสมาชิก :</Text>

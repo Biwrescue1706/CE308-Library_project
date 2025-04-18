@@ -7,7 +7,7 @@ import {
   StyleSheet,
   RefreshControl,
   ScrollView,
-  Alert ,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -91,7 +91,6 @@ export default function AccountScreen() {
           <Text>🆔 รหัสสมาชิก: {users.memberId}</Text>
           <Text>👤 ชื่อใช้งาน : {users.username}</Text>
           <Text>👤 ชื่อ ภาษาไทย: {users.titleTH} {users.firstNameTH} {users.lastNameTH}</Text>
-          <Text>👤 ชื่อ ภาษาอังกฤษ: {users.titleEN} {users.firstNameEN} {users.lastNameEN}</Text>
           <Text>📞 เบอร์โทร: {users.phone}</Text>
           <Text>
             📅 วันสมัครสมาชิก:{" "}
@@ -109,6 +108,31 @@ export default function AccountScreen() {
           >
             <Text style={styles.buttonText}>✏️ แก้ไขข้อมูลส่วนตัว</Text>
           </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/account/changePassword")}
+          >
+            <Text style={styles.buttonText}>🔒 เปลี่ยนรหัสผ่าน</Text>
+          </TouchableOpacity>
+
+          {users?.role === "admin" && (
+            <>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/account/addBooks")}
+              >
+                <Text style={styles.buttonText}>📚 จัดการหนังสือ</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push("/account/manageusers")}
+              >
+                <Text style={styles.buttonText}>👥 จัดการสมาชิก</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
           <TouchableOpacity
             style={styles.button}

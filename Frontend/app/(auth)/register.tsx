@@ -279,6 +279,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#fff",
+    margin : 10 ,
   },
   header: {
     fontSize: 26,
@@ -317,7 +318,8 @@ const styles = StyleSheet.create({
   loginContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 40,
+    marginBottom: 40,
   },
   loginText: {
     color: "#007bff",

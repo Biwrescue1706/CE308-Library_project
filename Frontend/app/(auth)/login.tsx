@@ -45,9 +45,9 @@ export default function LoginScreen() {
       Alert.alert(" เข้าสู่ระบบสำเร็จ");
 
       if (user.role === "admin") {
-        router.replace("/(tabs)/addBooks");
+        router.replace("/(tabs)/account");
       } else {
-        router.replace("/");
+        router.replace("/(tabs)/account");
       }
     } catch (err: any) {
       console.error(" Login error:", err.response?.data || err.message);

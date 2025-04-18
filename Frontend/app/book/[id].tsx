@@ -20,7 +20,7 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(1);
 
   useEffect(() => {
     if (!id) return;
@@ -105,13 +105,16 @@ export default function BookDetailScreen() {
         <Text style={styles.detail}>จำนวนที่เหลือ: {book.availableCopies}</Text>
 
         <View style={styles.quantityRow}>
-          <TouchableOpacity onPress={() => setQuantity(Math.max(1, quantity - 1))} style={styles.quantityButton}>
+          <TouchableOpacity
+            onPress={() =>
+              setQuantity(Math.max(1, quantity - 1))}
+            style={styles.quantityButton}>
             <Text style={styles.quantityText}>-</Text>
           </TouchableOpacity>
           <TextInput
             style={styles.input}
             value={quantity.toString()}
-            onChangeText={(text) => setQuantity(Number(text) || 0)}
+            onChangeText={(text) => setQuantity(Number(text) || 1)}
             keyboardType="numeric"
           />
           <TouchableOpacity onPress={() => setQuantity(quantity + 1)} style={styles.quantityButton}>
