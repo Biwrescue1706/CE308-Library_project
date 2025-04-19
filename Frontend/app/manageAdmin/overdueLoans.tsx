@@ -27,11 +27,13 @@ export default function OverdueLoansScreen() {
         loans.map((loan: any, index) => (
           <View key={loan.id} style={styles.card}>
             <Text>#{index + 1} - {loan.title}</Text>
-            <Text>👤 {loan.fullNameTH} ({loan.username})</Text>
-            <Text>📅 ยืม: {new Date(loan.loanDate).toLocaleDateString()}</Text>
-            <Text>📅 ครบกำหนด: {new Date(loan.dueDate).toLocaleDateString()}</Text>
-            <Text>📦 จำนวน: {loan.quantity}</Text>
-            <Text style={{ color: "red" }}>⏱️ เกินกำหนด {loan.lateDays} วัน</Text>
+            <Text><Text style={styles.bold}>👤 ผู้ยืม : </Text>{loan.username}</Text>
+            <Text><Text style={styles.bold}>👤 ชื่อ : </Text> {loan.fullNameTH} </Text>
+            <Text><Text style={styles.bold}>📕 หนังสือ : </Text>{loan.bookTitle}</Text>
+            <Text><Text style={styles.bold}>📅 ยืม : </Text> {new Date(loan.loanDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text> {new Date(loan.dueDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📦 จำนวน : </Text> {loan.quantity} <Text style={styles.bold}> เล่ม </Text></Text>
+            <Text style={{ color: "red" }}> <Text style={styles.bold}>⏱️ เกินกำหนด : </Text> {loan.lateDays} <Text style={styles.bold}>วัน</Text> </Text>
           </View>
         ))
       )}
@@ -40,13 +42,24 @@ export default function OverdueLoansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: "#FFEBEE" },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  container: {
+    padding: 20,
+    backgroundColor: "#C8E6B2"
+  },
+  header: { 
+    fontSize: 24, 
+    fontWeight: "bold", 
+    marginBottom: 20, 
+    textAlign: "center" 
+  },
   card: {
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 10,
     marginBottom: 12,
     elevation: 2,
+  },
+  bold: {
+    fontWeight: "bold",
   },
 });

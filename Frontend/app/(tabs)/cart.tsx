@@ -86,10 +86,13 @@ export default function CartScreen() {
           })),
         },
         { withCredentials: true }
+
       )
       .then(() => {
         Alert.alert("✅ ยืมสำเร็จ");
         fetchCart();
+        handleClear();
+        router.replace("/(tabs)/history");
       })
       .catch((err) => {
         console.error("❌ ยืมไม่สำเร็จ:", err);

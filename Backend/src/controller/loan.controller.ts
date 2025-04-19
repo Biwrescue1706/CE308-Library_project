@@ -2,35 +2,62 @@ import { Request, Response } from "express";
 import { prisma } from "../utils/prisma";
 import * as LoanService from "../service/loan.service";
 import { differenceInDays, addDays } from "date-fns";
+import axios from "axios";
+
+// 🟢 LINE Messaging API
+const LINE_API_URL = "https://api.line.me/v2/bot/message/push";
+const LINE_GROUP_ID = "C5ea2bec79706873f7212a1dccd5c6702"; // 🔁 แทนที่ด้วย groupId จริง
+const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN ||
+  "WBtqkdSyTJvF/CUH3UWiseH+Q61cmSJ8bQctxurcN4jDWZaeCii0Pfh27BM88S5wJ6GMyCocVk1/ns70lnsTLLTLy1jLiFjLATYgetkNgW6ZShb1/3Yint3caetYvC8BjUxEqoGyPs/4mH6ZIlMs7wdB04t89/1O/w1cDnyilFU=";
+
+const sendLineMessage = async (message: string) => {
+  try {
+    await axios.post(
+      LINE_API_URL,
+      {
+        to: LINE_GROUP_ID,
+        messages: [{ type: "text", text: message }],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${LINE_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error("❌ ไม่สามารถส่ง LINE ได้:", error.response?.data || error.message);
+    } else {
+      console.error("❌ ไม่สามารถส่ง LINE ได้:", error);
+    }
+  }
+};
 
 // ✅ ยืมหนังสือ
 export const borrowBook = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = (req as any).user; // มาจาก middleware
+    const user = (req as any).user;
     const { bookId, quantity } = req.body;
 
     if (!user) {
       res.status(401).json({ message: "กรุณาเข้าสู่ระบบ" });
-      return;
+      return
     }
-
     if (!bookId || !quantity || quantity <= 0) {
       res.status(400).json({ message: "กรุณาระบุรหัสหนังสือและจำนวนที่ต้องการยืมให้ถูกต้อง" });
-      return;
+      return
     }
 
-    const book = await prisma.book.findUnique({
-      where: { id: bookId },
-    });
-
+    const book = await prisma.book.findUnique({ where: { id: bookId } });
     if (!book) {
       res.status(404).json({ message: "ไม่พบหนังสือ" });
-      return;
+      return
     }
 
     if (book.availableCopies < quantity) {
       res.status(400).json({ message: "จำนวนหนังสือไม่เพียงพอสำหรับการยืม" });
-      return;
+      return
     }
 
     const now = new Date();
@@ -50,11 +77,19 @@ export const borrowBook = async (req: Request, res: Response): Promise<void> => 
     await prisma.book.update({
       where: { id: bookId },
       data: {
-        availableCopies: {
-          decrement: quantity,
-        },
+        availableCopies: { decrement: quantity },
       },
     });
+
+    // 🟢 ส่งแจ้งเตือนไปยัง LINE group
+    await sendLineMessage(
+      `📚 ยืมหนังสือ\n` +
+      `ผู้ใช้: ${user.username}\n` +
+      `ชื่อหนังสือ: ${book.title}\n` +
+      `จำนวน: ${quantity} เล่ม\n` +
+      `วันที่ยืม: ${now.toLocaleDateString("th-TH")}\n` +
+      `ครบกำหนดคืน: ${dueDate.toLocaleDateString("th-TH")}`
+    );
 
     res.status(201).json({ message: "ยืมหนังสือสำเร็จ", loan });
   } catch (err) {
@@ -95,11 +130,15 @@ export const returnBook = async (req: Request, res: Response): Promise<void> => 
 
     const loan = await prisma.loan.findUnique({
       where: { id },
+      include: {
+        user: true,
+        book: true,
+      },
     });
 
     if (!loan || loan.returned) {
       res.status(400).json({ message: "ไม่พบการยืม หรือคืนไปแล้ว" });
-      return;
+      return
     }
 
     const returnDate = new Date();
@@ -124,6 +163,17 @@ export const returnBook = async (req: Request, res: Response): Promise<void> => 
       },
     });
 
+    // 🟢 แจ้งเตือนคืน
+    await sendLineMessage(
+      `✅ คืนหนังสือ\n` +
+      `ผู้ใช้: ${loan.user.username}\n` +
+      `ชื่อหนังสือ: ${loan.book.title}\n` +
+      `จำนวน: ${loan.quantity} เล่ม\n` +
+      `วันที่ยืม: ${loan.loanDate.toLocaleDateString("th-TH")}\n` +
+      `วันที่คืน: ${returnDate.toLocaleDateString("th-TH")}\n` +
+      `${lateDays > 0 ? `⏰ เกินกำหนด ${lateDays} วัน` : "🟢 คืนตรงเวลา"}`
+    );
+    
     res.json({ message: "คืนหนังสือสำเร็จ", loan: updatedLoan });
   } catch (err) {
     console.error(err);
@@ -144,7 +194,11 @@ export const getLoansByUser = async (req: Request, res: Response): Promise<void>
     const loans = await prisma.loan.findMany({
       where: { userId: user.id },
       include: {
-        book: true,
+        book: {
+          select: {
+            title: true,
+          },
+        },
       },
       orderBy: {
         loanDate: "desc",
@@ -207,8 +261,23 @@ export const getActiveLoans = async (req: Request, res: Response): Promise<void>
     const loans = await prisma.loan.findMany({
       where: { returned: false },
       include: {
-        user: { select: { username: true } },
-        book: { select: { title: true } },
+        user: {
+          select:
+          {
+            username: true,
+            titleTH: true,
+            firstNameTH: true,
+            lastNameTH: true,
+            phone: true,
+            memberId: true,
+          }
+        },
+        book: {
+          select:
+          {
+            title: true,
+          }
+        },
       },
       orderBy: {
         loanDate: "desc",
@@ -217,10 +286,13 @@ export const getActiveLoans = async (req: Request, res: Response): Promise<void>
 
     const result = loans.map((loan) => ({
       id: loan.id,
+      memberId: loan.user.memberId,
       username: loan.user.username,
       title: loan.book.title,
       quantity: loan.quantity,
       loanDate: loan.loanDate,
+      phone: loan.user.phone,
+      fullNameTH: `${loan.user.titleTH}${loan.user.firstNameTH} ${loan.user.lastNameTH}`,
       dueDate: loan.dueDate,
       returnDate: loan.returnDate,
       returned: loan.returned,
@@ -260,6 +332,8 @@ export const getOverdueLoans = async (req: Request, res: Response): Promise<void
             titleTH: true,
             firstNameTH: true,
             lastNameTH: true,
+            phone: true,
+            memberId: true,
           },
         },
         book: {
@@ -275,7 +349,9 @@ export const getOverdueLoans = async (req: Request, res: Response): Promise<void
 
     const result = overdueLoans.map((loan) => ({
       id: loan.id,
+      memberId: loan.user.memberId,
       username: loan.user.username,
+      phone: loan.user.phone,
       fullNameTH: `${loan.user.titleTH}${loan.user.firstNameTH} ${loan.user.lastNameTH}`,
       title: loan.book.title,
       quantity: loan.quantity,

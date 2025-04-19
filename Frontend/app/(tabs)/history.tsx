@@ -25,7 +25,7 @@ export default function HistoryScreen() {
       .get(`${API_URL}/users/me`)
       .then(() => {
         setIsLoggedIn(true);
-        return axios.get(`${API_URL}/users/history`);
+        return axios.get(`${API_URL}/loans/my-borrow`);
       })
       .then((response) => {
         setHistory(response.data);
@@ -41,7 +41,7 @@ export default function HistoryScreen() {
   // 📌 คืนหนังสือ
   const handleReturnBook = (loanId: string) => {
     axios
-      .post(`${API_URL}/lons/return`, { loanId })
+      .post(`${API_URL}/loans/return/${loanId}`, null, { withCredentials: true })
       .then(() => {
         setHistory((prev) =>
           prev.map((item) =>
@@ -51,7 +51,7 @@ export default function HistoryScreen() {
       })
       .catch((error) => console.error("❌ Error returning book:", error));
   };
-
+  
   // 📌 ยังไม่ล็อกอิน
   if (!loading && isLoggedIn === false) {
     return (
@@ -76,10 +76,10 @@ export default function HistoryScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.historyContainer}>
-              <Text style={styles.bookTitle}>📖 {item.bookTitle}</Text>
+              <Text style={styles.bookTitle}>📖 {item.title}</Text>
               <Text>
                 📅 วันที่ยืม:{" "}
-                {new Date(item.borrowDate).toLocaleDateString("th-TH")}
+                {new Date(item.loanDate).toLocaleDateString("th-TH")}
               </Text>
               <Text>
                 ⏳ วันครบกำหนดคืน:{" "}

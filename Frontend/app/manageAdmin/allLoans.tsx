@@ -29,11 +29,14 @@ export default function AllLoansScreen() {
         loans.map((loan: any, index) => (
           <View key={loan.id} style={styles.card}>
             <Text>#{index + 1} - {loan.title}</Text>
-            <Text>👤 {loan.username}</Text>
-            <Text>📅 ยืม: {new Date(loan.loanDate).toLocaleDateString()}</Text>
-            <Text>📅 ครบกำหนด: {new Date(loan.dueDate).toLocaleDateString()}</Text>
-            <Text>📦 จำนวน: {loan.quantity}</Text>
-            <Text>✅ คืนแล้ว: {loan.returned ? "✅" : "❌"}</Text>
+            <Text><Text style={styles.bold}>👤 ผู้ยืม : </Text>{loan.username}</Text>
+            <Text><Text style={styles.bold}>📅 ยืม : </Text>{new Date(loan.loanDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text>{new Date(loan.dueDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📦 จำนวน : </Text>{loan.quantity} เล่ม</Text>
+            <Text>
+              <Text style={styles.bold}>✅ คืนแล้ว : </Text>
+              {loan.returned ? "✅ คืนแล้ว" : "❌ ยังไม่ได้คืน"}
+            </Text>
           </View>
         ))
       )}
@@ -59,5 +62,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 12,
     elevation: 2,
+  },
+  bold: {
+    fontWeight: "bold",
   },
 });

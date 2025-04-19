@@ -1,4 +1,3 @@
-// app/admin/activeLoans.tsx
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import axios from "axios";
@@ -26,11 +25,13 @@ export default function ActiveLoansScreen() {
       ) : (
         loans.map((loan: any, index) => (
           <View key={loan.id} style={styles.card}>
-            <Text>#{index + 1} - {loan.title}</Text>
-            <Text>👤 {loan.username}</Text>
-            <Text>📅 ยืม: {new Date(loan.loanDate).toLocaleDateString()}</Text>
-            <Text>📅 ครบกำหนด: {new Date(loan.dueDate).toLocaleDateString()}</Text>
-            <Text>📦 จำนวน: {loan.quantity}</Text>
+            <Text style={styles.bold}>#{index + 1} - {loan.title}</Text>
+            <Text><Text style={styles.bold}>👤 ผู้ยืม : </Text>{loan.username}</Text>
+            <Text><Text style={styles.bold}>👤 ชื่อผู้ยืม : </Text> {loan.fullNameTH} </Text>
+            <Text><Text style={styles.bold}>📅 ยืม : </Text>{new Date(loan.loanDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text>{new Date(loan.dueDate).toLocaleDateString()}</Text>
+            <Text><Text style={styles.bold}>📦 จำนวน : </Text>{loan.quantity} เล่ม</Text>
+            <Text><Text style={styles.bold}>📞 เบอร์โทร : </Text>{(loan.phone)}</Text>
           </View>
         ))
       )}
@@ -39,13 +40,25 @@ export default function ActiveLoansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, backgroundColor: "#FFF3CD" },
-  header: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  container: {
+    padding: 20,
+    backgroundColor: "#C8E6B2",
+    flexGrow: 1,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center"
+  },
   card: {
     backgroundColor: "#fff",
     padding: 16,
     borderRadius: 10,
     marginBottom: 12,
     elevation: 2,
+  },
+  bold: {
+    fontWeight: "bold",
   },
 });
