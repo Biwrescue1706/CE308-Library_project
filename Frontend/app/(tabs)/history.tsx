@@ -92,14 +92,14 @@ export default function HistoryScreen() {
           renderItem={({ item }) => (
             <View style={styles.historyContainer}>
               <Text style={styles.bookTitle}>📖 {item.title}</Text>
-              <Text><Text style={styles.bold}>📦 จำนวน : </Text>{item.quantity} เล่ม</Text>
-              <Text>📅 วันที่ยืม: {formatThaiDate(item.loanDate)}</Text>
-              <Text>⏳ วันครบกำหนดคืน: {formatThaiDate(item.dueDate)}</Text>
+              <Text><Text style={styles.bold}>📦 จำนวน : </Text> {item.quantity} เล่ม</Text>
+              <Text><Text style={styles.bold}>📅 วันที่ยืม : </Text>{formatThaiDate(item.loanDate)}</Text>
+              <Text><Text style={styles.bold}>⏳ วันครบกำหนดคืน : </Text>{formatThaiDate(item.dueDate)}</Text>
               {item.returned && item.returnDate && (
                 <Text>🗓 วันที่คืน: {formatThaiDate(item.returnDate)}</Text>
               )}
-              <Text style={{ color: item.returned ? "green" : "red" }}>สถานะการคืน : 
-                {item.returned ? "✅ คืนแล้ว" : "⏳ ยังไม่คืน"}
+              <Text style={{ color: item.returned ? "green" : "red" }}><Text style={styles.bold}> สถานะการคืน : </Text>
+                {item.returned ? "✅ คืนแล้ว" : "⏳ รอการคืนหนังสือ"}
               </Text>
 
               {!item.returned && (
