@@ -1,22 +1,13 @@
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  Platform,
-  ScrollView,
-  KeyboardAvoidingView,
-  Modal,
-  FlatList,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Platform,
+  ScrollView, KeyboardAvoidingView, Modal, FlatList,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -73,7 +64,6 @@ export default function RegisterScreen() {
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTitleModal, setShowTitleModal] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (key: string, value: any) => {
@@ -82,15 +72,8 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     const {
-      email,
-      username,
-      password,
-      confirmPassword,
-      titleTH,
-      firstNameTH,
-      lastNameTH,
-      birthDate,
-      phone,
+      email, username, password, confirmPassword,
+      titleTH, firstNameTH, lastNameTH, birthDate, phone
     } = form;
 
     if (!email || !username || !password || !confirmPassword || !titleTH || !firstNameTH || !lastNameTH || !phone) {
@@ -102,8 +85,6 @@ export default function RegisterScreen() {
       Alert.alert("❌ รหัสผ่านไม่ตรงกัน");
       return;
     }
-
-    setLoading(true);
 
     try {
       await axios.post(`${API_URL}/users/register`, {
@@ -124,8 +105,6 @@ export default function RegisterScreen() {
         "❌ สมัครไม่สำเร็จ",
         error.response?.data?.message || "โปรดลองใหม่"
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -138,52 +117,53 @@ export default function RegisterScreen() {
           <Text style={styles.label}>อีเมล</Text>
           <TextInput
             style={styles.input}
-            value={form.email}
             keyboardType="email-address"
             autoCapitalize="none"
-            onChangeText={(text) => handleChange("email", text)}
-          />
+            value={form.email}
+            onChangeText={(text) =>
+              handleChange("email", text)} />
 
           <Text style={styles.label}>ชื่อผู้ใช้ (Username)</Text>
           <TextInput
             style={styles.input}
             value={form.username}
-            onChangeText={(text) => handleChange("username", text)}
-          />
+            onChangeText={(text) =>
+              handleChange("username", text)} />
 
           <Text style={styles.label}>รหัสผ่าน</Text>
           <TextInput
             style={styles.input}
             secureTextEntry={!showPassword}
             value={form.password}
-            onChangeText={(text) => handleChange("password", text)}
-          />
+            onChangeText={(text) =>
+              handleChange("password", text)} />
           <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={{ marginLeft: 25, marginBottom: 15 }}
-          >
-            <Text style={{ color: "#007bff" }}>
+            onPress={() =>
+              setShowPassword(!showPassword)}
+            style={{ marginLeft: 25, marginBottom: 10 }}>
+            <Text
+              style={{ color: "#007bff" }}>
               {showPassword ? "🙈" : "👁️"}
             </Text>
           </TouchableOpacity>
+
           <Text style={styles.label}>ยืนยันรหัสผ่าน</Text>
           <TextInput
             style={styles.input}
             secureTextEntry={!showPassword}
             value={form.confirmPassword}
-            onChangeText={(text) => handleChange("confirmPassword", text)}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={{ marginLeft: 25, marginBottom: 15 }}
-          >
-            <Text style={{ color: "#007bff" }}>
-              {showPassword ? "🙈" : "👁️"}
-            </Text>
-          </TouchableOpacity>
+            onChangeText={(text) =>
+              handleChange("confirmPassword", text)} />
 
-          <Text style={styles.label}>คำนำหน้า (ไทย)</Text>
-          <TouchableOpacity style={styles.input} onPress={() => setShowTitleModal(true)}>
+          <Text
+            style={styles.label}>
+            คำนำหน้า (ไทย)
+          </Text>
+
+          <TouchableOpacity
+            style={styles.input}
+            onPress={() =>
+              setShowTitleModal(true)}>
             <Text>{form.titleTH || "เลือกคำนำหน้า"}</Text>
           </TouchableOpacity>
 
@@ -191,23 +171,23 @@ export default function RegisterScreen() {
           <TextInput
             style={styles.input}
             value={form.firstNameTH}
-            onChangeText={(text) => handleChange("firstNameTH", text)}
-          />
+            onChangeText={(text) =>
+              handleChange("firstNameTH", text)} />
 
           <Text style={styles.label}>นามสกุล (ไทย)</Text>
           <TextInput
             style={styles.input}
             value={form.lastNameTH}
-            onChangeText={(text) => handleChange("lastNameTH", text)}
-          />
+            onChangeText={(text) =>
+              handleChange("lastNameTH", text)} />
 
           <Text style={styles.label}>เบอร์โทรศัพท์</Text>
           <TextInput
             style={styles.input}
             value={form.phone}
             keyboardType="phone-pad"
-            onChangeText={(text) => handleChange("phone", text)}
-          />
+            onChangeText={(text) =>
+              handleChange("phone", text)} />
 
           <Text style={styles.label}>วันเกิด</Text>
           <TouchableOpacity style={[styles.input, { justifyContent: "center" }]} onPress={() => setShowDatePicker(true)}>
@@ -226,8 +206,8 @@ export default function RegisterScreen() {
             />
           )}
 
-          <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>สมัครสมาชิก</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleRegister}>
+            <Text style={styles.buttonText}>สมัครสมาชิก</Text>
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
@@ -239,7 +219,7 @@ export default function RegisterScreen() {
         </View>
       </ScrollView>
 
-      {/* Modal เลือกคำนำหน้า */}
+      {/* Modal สำหรับเลือกคำนำหน้า */}
       <Modal visible={showTitleModal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -247,13 +227,11 @@ export default function RegisterScreen() {
               data={titleOptions}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.option}
+                <TouchableOpacity style={styles.option}
                   onPress={() => {
                     handleChange("titleTH", item);
                     setShowTitleModal(false);
-                  }}
-                >
+                  }}>
                   <Text>{item}</Text>
                 </TouchableOpacity>
               )}
@@ -277,7 +255,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#fff",
-    margin : 10 ,
+    margin: 10,
   },
   header: {
     fontSize: 26,

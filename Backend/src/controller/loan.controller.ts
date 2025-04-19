@@ -114,7 +114,31 @@ export const borrowMultiple = async (req: Request, res: Response): Promise<void>
       return;
     }
 
+    // ดึงรายละเอียดหนังสือทั้งหมดที่ยืม
+    const bookIds = items.map((item) => item.bookId);
+    const books = await prisma.book.findMany({
+      where: { id: { in: bookIds } },
+      select: { id: true, title: true },
+    });
+
+    // ยืมหนังสือทั้งหมด
     const loans = await LoanService.borrowMultipleBooks(user.id, items);
+
+    // แปลงข้อมูลสำหรับ LINE
+    const now = new Date();
+    const dueDate = addDays(now, 7);
+    const bookLines = items.map((item) => {
+      const matchedBook = books.find((b) => b.id === item.bookId);
+      return `- ${matchedBook?.title || "ไม่พบชื่อหนังสือ"} (${item.quantity} เล่ม)`;
+    }).join("\n");
+
+    await sendLineMessage(
+      `📚 ยืมหนังสือหลายรายการ\n` +
+      `ผู้ใช้: ${user.username}\n` +
+      `วันที่ยืม: ${now.toLocaleDateString("th-TH")}\n` +
+      `ครบกำหนดคืน: ${dueDate.toLocaleDateString("th-TH")}\n` +
+      `รายการ:\n${bookLines}`
+    );
 
     res.status(201).json({ message: "ยืมหนังสือหลายรายการสำเร็จ", loans });
   } catch (error: any) {
@@ -122,6 +146,7 @@ export const borrowMultiple = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: error.message || "เกิดข้อผิดพลาดในการยืมหลายรายการ" });
   }
 };
+
 
 // ✅ คืนหนังสือ
 export const returnBook = async (req: Request, res: Response): Promise<void> => {
@@ -205,7 +230,18 @@ export const getLoansByUser = async (req: Request, res: Response): Promise<void>
       },
     });
 
-    res.json(loans);
+    const result = loans.map((loan) => ({
+      id: loan.id,
+      title: loan.book.title,
+      quantity: loan.quantity,
+      loanDate: loan.loanDate,
+      dueDate: loan.dueDate,
+      returnDate: loan.returnDate,
+      returned: loan.returned,
+      lateDays: loan.lateDays,
+    }));
+
+    res.json(result);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลการยืมหนังสือ" });
@@ -368,3 +404,4 @@ export const getOverdueLoans = async (req: Request, res: Response): Promise<void
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลรายการเกินกำหนดคืน" });
   }
 };
+

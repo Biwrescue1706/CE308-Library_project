@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
+  View, Text, FlatList, TouchableOpacity, ActivityIndicator,
+  StyleSheet, RefreshControl,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -13,46 +9,62 @@ import { useRouter } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
+// ✅ แปลงวันที่เป็น พ.ศ.
+const formatThaiDate = (dateString: string | Date): string => {
+  const date = new Date(dateString);
+  const day = date.getDate();
+  const month = date.toLocaleString("th-TH", { month: "long" });
+  const year = date.getFullYear() + 543;
+  return `${day} ${month} ${year}`;
+};
+
 export default function HistoryScreen() {
   const router = useRouter();
   const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  // 📌 ดึงประวัติการยืมหนังสือ
-  useEffect(() => {
+  const fetchHistory = () => {
+    setRefreshing(true);
     axios
-      .get(`${API_URL}/users/me`)
+      .get(`${API_URL}/users/me`, { withCredentials: true })
       .then(() => {
         setIsLoggedIn(true);
-        return axios.get(`${API_URL}/loans/my-borrow`);
+        return axios.get(`${API_URL}/loans/my-borrow`, { withCredentials: true });
       })
       .then((response) => {
         setHistory(response.data);
         setLoading(false);
+        setRefreshing(false);
       })
       .catch((error) => {
         console.log("❌ ยังไม่ล็อกอินหรือดึงข้อมูลล้มเหลว:", error.message);
         setIsLoggedIn(false);
         setLoading(false);
+        setRefreshing(false);
       });
+  };
+
+  useEffect(() => {
+    fetchHistory();
   }, []);
 
-  // 📌 คืนหนังสือ
   const handleReturnBook = (loanId: string) => {
     axios
       .post(`${API_URL}/loans/return/${loanId}`, null, { withCredentials: true })
       .then(() => {
         setHistory((prev) =>
           prev.map((item) =>
-            item.id === loanId ? { ...item, returned: true } : item
+            item.id === loanId
+              ? { ...item, returned: true, returnDate: new Date() }
+              : item
           )
         );
       })
       .catch((error) => console.error("❌ Error returning book:", error));
   };
-  
-  // 📌 ยังไม่ล็อกอิน
+
   if (!loading && isLoggedIn === false) {
     return (
       <View style={styles.container}>
@@ -74,18 +86,19 @@ export default function HistoryScreen() {
         <FlatList
           data={history}
           keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={fetchHistory} />
+          }
           renderItem={({ item }) => (
             <View style={styles.historyContainer}>
               <Text style={styles.bookTitle}>📖 {item.title}</Text>
-              <Text>
-                📅 วันที่ยืม:{" "}
-                {new Date(item.loanDate).toLocaleDateString("th-TH")}
-              </Text>
-              <Text>
-                ⏳ วันครบกำหนดคืน:{" "}
-                {new Date(item.dueDate).toLocaleDateString("th-TH")}
-              </Text>
-              <Text style={{ color: item.returned ? "green" : "red" }}>
+              <Text><Text style={styles.bold}>📦 จำนวน : </Text>{item.quantity} เล่ม</Text>
+              <Text>📅 วันที่ยืม: {formatThaiDate(item.loanDate)}</Text>
+              <Text>⏳ วันครบกำหนดคืน: {formatThaiDate(item.dueDate)}</Text>
+              {item.returned && item.returnDate && (
+                <Text>🗓 วันที่คืน: {formatThaiDate(item.returnDate)}</Text>
+              )}
+              <Text style={{ color: item.returned ? "green" : "red" }}>สถานะการคืน : 
                 {item.returned ? "✅ คืนแล้ว" : "⏳ ยังไม่คืน"}
               </Text>
 
@@ -105,7 +118,6 @@ export default function HistoryScreen() {
   );
 }
 
-// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -131,7 +143,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   bookTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: "bold",
     marginBottom: 5,
   },
@@ -153,5 +165,8 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  bold: {
+    fontWeight: "bold",
   },
 });

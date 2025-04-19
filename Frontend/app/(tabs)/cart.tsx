@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Alert,
   StyleSheet,
-  ActivityIndicator,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -18,7 +18,6 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export default function CartScreen() {
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
@@ -32,13 +31,11 @@ export default function CartScreen() {
       })
       .then((res) => {
         setItems(res.data);
-        setLoading(false);
         setRefreshing(false);
       })
       .catch((err) => {
         console.error("❌ ตรวจสอบ token ล้มเหลว:", err);
         setIsLoggedIn(false);
-        setLoading(false);
         setRefreshing(false);
         if (err.response?.status === 401 || err.response?.status === 403) {
           Alert.alert("หมดเวลาใช้งาน", "กรุณาเข้าสู่ระบบใหม่");
@@ -58,9 +55,7 @@ export default function CartScreen() {
         Alert.alert("✅ ลบสำเร็จ");
         fetchCart();
       })
-      .catch((err) => {
-        console.error("❌ ลบไม่สำเร็จ:", err);
-      });
+      .catch((err) => console.error("❌ ลบไม่สำเร็จ:", err));
   };
 
   const handleClear = () => {
@@ -70,9 +65,7 @@ export default function CartScreen() {
         Alert.alert("✅ ล้างตะกร้าสำเร็จ");
         fetchCart();
       })
-      .catch((err) => {
-        console.error("❌ ล้างตะกร้าไม่สำเร็จ:", err);
-      });
+      .catch((err) => console.error("❌ ล้างตะกร้าไม่สำเร็จ:", err));
   };
 
   const handleBorrowAll = () => {
@@ -86,11 +79,9 @@ export default function CartScreen() {
           })),
         },
         { withCredentials: true }
-
       )
       .then(() => {
         Alert.alert("✅ ยืมสำเร็จ");
-        fetchCart();
         handleClear();
         router.replace("/(tabs)/history");
       })
@@ -100,13 +91,30 @@ export default function CartScreen() {
       });
   };
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="tomato" />
-      </View>
-    );
-  }
+  const handleUpdateQuantity = (bookId: string, newQty: number) => {
+    if (newQty <= 0) {
+      handleRemove(bookId);
+      return;
+    }
+
+    axios
+      .patch(
+        `${API_URL}/cart/update/${bookId}`,
+        { quantity: newQty },
+        { withCredentials: true }
+      )
+      .then(() => {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.book.id === bookId ? { ...item, quantity: newQty } : item
+          )
+        );
+      })
+      .catch((err) => {
+        console.error("❌ อัปเดตจำนวนล้มเหลว:", err);
+        Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตจำนวนได้");
+      });
+  };
 
   if (!isLoggedIn) {
     return (
@@ -130,7 +138,28 @@ export default function CartScreen() {
         <View style={styles.itemBox}>
           <Text style={styles.title}>{item.book.title}</Text>
           <Text>ผู้แต่ง: {item.book.author}</Text>
-          <Text>จำนวน: {item.quantity ?? 1}</Text>
+          <View style={styles.quantityRow}>
+            <TouchableOpacity
+              onPress={() => handleUpdateQuantity(item.book.id, item.quantity - 1)}
+              style={styles.qtyButton}
+            >
+              <Text style={styles.qtyText}>➖</Text>
+            </TouchableOpacity>
+            <Text style={styles.qtyDisplay}>{item.quantity}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (item.quantity < item.book.availableCopies) {
+                  handleUpdateQuantity(item.book.id, item.quantity + 1);
+                } else {
+                  Alert.alert("❌ เกินจำนวนที่มี", `มีหนังสือได้สูงสุด ${item.book.availableCopies} เล่ม`);
+                }
+              }}
+              style={styles.qtyButton}
+            >
+              <Text style={styles.qtyText}>➕</Text>
+            </TouchableOpacity>
+
+          </View>
           <TouchableOpacity
             style={styles.removeButton}
             onPress={() => handleRemove(item.book.id)}
@@ -183,6 +212,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
+  },
+  quantityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    justifyContent: "center",
+  },
+  qtyButton: {
+    backgroundColor: "#ccc",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginHorizontal: 10,
+  },
+  qtyText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    margin : 5,
+  },
+  qtyDisplay: {
+    fontSize: 16,
+    fontWeight: "bold",
+    minWidth: 30,
+    textAlign: "center",
   },
   removeButton: {
     marginTop: 10,

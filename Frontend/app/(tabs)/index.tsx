@@ -69,7 +69,8 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity
               style={styles.detailButton}
-              onPress={() => router.push(`./book/${item.id}`)}
+              onPress={() =>
+                router.push(`/book/${item.id}`)}
             >
               <Text style={styles.detailText}>🔍 ดูรายละเอียด</Text>
             </TouchableOpacity>

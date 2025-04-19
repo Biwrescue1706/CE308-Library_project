@@ -3,11 +3,10 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
-  StyleSheet,
   RefreshControl,
   ScrollView,
   Alert,
+  StyleSheet,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -18,36 +17,28 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export default function AccountScreen() {
   const router = useRouter();
   const [users, setUsers] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchUser = useCallback(() => {
-    setLoading(true);
+    setRefreshing(true);
     axios
       .get(`${API_URL}/users/me`, { withCredentials: true })
       .then((response) => {
         setUsers(response.data?.user || response.data);
-        setLoading(false);
         setRefreshing(false);
       })
       .catch((error) => {
         console.error("❌ Error fetching user data:", error);
         setUsers(null);
-        setLoading(false);
         setRefreshing(false);
+        Alert.alert("หมดเวลาใช้งาน", "กรุณาเข้าสู่ระบบใหม่");
+        router.replace("/(auth)/login");
       });
   }, []);
 
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
-
-  useEffect(() => {
-    if (!loading && users === null) {
-      Alert.alert("หมดเวลาใช้งาน", "กรุณาเข้าสู่ระบบใหม่");
-      router.replace("/(auth)/login");
-    }
-  }, [loading, users]);
 
   const handleLogout = () => {
     axios
@@ -59,7 +50,6 @@ export default function AccountScreen() {
       .catch((error) => console.error("❌ Error logging out:", error));
   };
 
-  // 📌 แปลงวันที่เป็นภาษาไทย + พ.ศ.
   const formatThaiDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate();
@@ -72,50 +62,42 @@ export default function AccountScreen() {
     <ScrollView
       contentContainerStyle={styles.container}
       refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={() => {
-            setRefreshing(true);
-            fetchUser();
-          }}
-        />
+        <RefreshControl refreshing={refreshing} onRefresh={fetchUser} />
       }
     >
-
-      {loading ? (
-        <ActivityIndicator size="large" color="tomato" />
-      ) : users ? (
+      {users ? (
         <>
           <Text style={styles.header}>👤 บัญชีของฉัน</Text>
           <View style={styles.userInfoBox}>
-            <Text style={styles.infoText}>📧 อีเมล: {users.email}</Text>
-            <Text style={styles.infoText}>🆔 รหัสสมาชิก: {users.memberId}</Text>
+            <Text style={styles.infoText}>📧 อีเมล : {users.email}</Text>
+            <Text style={styles.infoText}>🆔 รหัสสมาชิก : {users.memberId}</Text>
             <Text style={styles.infoText}>👤 ชื่อใช้งาน : {users.username}</Text>
             <Text style={styles.infoText}>
-              👤 ชื่อ ภาษาไทย: {users.titleTH} {users.firstNameTH} {users.lastNameTH}
+              👤 ชื่อ ภาษาไทย : {users.titleTH} {users.firstNameTH} {users.lastNameTH}
             </Text>
-            <Text style={styles.infoText}>📞 เบอร์โทร: {users.phone}</Text>
             <Text style={styles.infoText}>
-              📅 วันสมัครสมาชิก: {formatThaiDate(users.registrationDate || users.createdAt)}
+              👤 ชื่อ ภาษาอังกฤษ : {users.titleEN} {users.firstNameEN} {users.lastNameEN}
+            </Text>
+            <Text style={styles.infoText}>📞 เบอร์โทร : {users.phone}</Text>
+            <Text style={styles.infoText}>
+              📅 วันสมัครสมาชิก : {formatThaiDate(users.registrationDate || users.createdAt)}
             </Text>
           </View>
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("/account/manageProfile")} // ← ปรับตาม path ที่คุณใช้จริง
+            onPress={() => router.push("/account/manageProfile")}
           >
             <Text style={styles.buttonText}>📄 จัดการโปรไฟล์ของฉัน</Text>
           </TouchableOpacity>
 
           {users?.role === "admin" && (
-            <>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push("/account/manageAdmin")}
-              >
-                <Text style={styles.buttonText}>ระบบจัดการของ Admin</Text>
-              </TouchableOpacity>
-            </>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => router.push("/account/manageAdmin")}
+            >
+              <Text style={styles.buttonText}>ระบบจัดการของ Admin</Text>
+            </TouchableOpacity>
           )}
 
           <TouchableOpacity
@@ -203,12 +185,5 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 16,
     marginBottom: 8,
-  },
-  loginButton: {
-    backgroundColor: "#007bff",
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 20,
-    alignItems: "center",
   },
 });

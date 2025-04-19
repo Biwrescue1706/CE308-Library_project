@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
@@ -19,29 +18,22 @@ export default function LoginScreen() {
   const router = useRouter();
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!usernameOrEmail) {
-      Alert.alert("กรุณากรอกอีเมลให้ถูกต้อง");
+    if (!usernameOrEmail || !password) {
+      Alert.alert("⚠️ กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน");
       return;
     }
-    if (!password) {
-      Alert.alert("กรุณากรอกรหัสผ่านให้ถูกต้อง");
-    }
-
-    setLoading(true);
 
     try {
-      const res = await axios
-        .post(`${API_URL}/users/login`,
-          {usernameOrEmail, password},
-          { withCredentials: true }
-        );
+      const res = await axios.post(
+        `${API_URL}/users/login`,
+        { usernameOrEmail, password },
+        { withCredentials: true }
+      );
 
       const { user } = res.data;
-      console.log("เข้าสู่ระบบแล้ว:", user);
 
       if (user.role === "admin") {
         router.replace("/(tabs)/account");
@@ -49,9 +41,8 @@ export default function LoginScreen() {
         router.replace("/");
       }
     } catch (err: any) {
-      console.error(" Login error:", err.response?.data || err.message);
-    } finally {
-      setLoading(false);
+      console.error("❌ Login error:", err.response?.data || err.message);
+      Alert.alert("เกิดข้อผิดพลาด", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
     }
   };
 
@@ -60,10 +51,10 @@ export default function LoginScreen() {
       <View style={styles.loginBox}>
         <Text style={styles.header}>🔑 เข้าสู่ระบบ</Text>
 
-        <Text style={styles.label}>อีเมล</Text>
+        <Text style={styles.label}>Username หรือ Email</Text>
         <TextInput
           style={styles.input}
-          placeholder="email"
+          placeholder="กรอก Username หรือ Email"
           value={usernameOrEmail}
           onChangeText={setUsernameOrEmail}
           autoCapitalize="none"
@@ -88,16 +79,8 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>เข้าสู่ระบบ</Text>
-          )}
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>เข้าสู่ระบบ</Text>
         </TouchableOpacity>
 
         <View style={styles.registerContainer}>
@@ -108,15 +91,10 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.forgotPasswordContainer}>
-          <TouchableOpacity
-            onPress={() =>
-              router.push("/(auth)/forgotPassword")}
-            style={{ marginTop: 10 }}>
+          <TouchableOpacity onPress={() => router.push("/(auth)/forgotPassword")}>
             <Text style={styles.forgotPassword}>ฉันลืมรหัสผ่าน</Text>
           </TouchableOpacity>
         </View>
-
-
       </View>
     </View>
   );
@@ -193,5 +171,4 @@ const styles = StyleSheet.create({
     right: 10,
     top: 15,
   },
-
 });

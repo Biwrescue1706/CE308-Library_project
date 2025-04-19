@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.post("/borrow", authenticate, LoanController.borrowBook);
 router.post("/return/:id", authenticate, LoanController.returnBook);
+
 router.get("/my-borrow", authenticate, LoanController.getLoansByUser);
 router.post("/borrow-multiple", authenticate, LoanController.borrowMultiple);
 
