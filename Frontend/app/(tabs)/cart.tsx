@@ -78,7 +78,7 @@ export default function CartScreen() {
   const handleBorrowAll = () => {
     axios
       .post(
-        `${API_URL}/loans/borrow`,
+        `${API_URL}/loans/borrow-multiple`,
         {
           items: items.map((item) => ({
             bookId: item.book.id,
