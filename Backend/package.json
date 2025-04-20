@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --ext ts --exec ts-node src/index.ts",
+    "dev": " -c green,cyan \"npm run server\"",
+    "server": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:migrate": "prisma migrate dev"
   },
