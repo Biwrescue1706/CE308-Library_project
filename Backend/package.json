@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": " -c green,cyan \"npm run server\"",
-    "server": "nodemon src/index.ts",
+    "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "db:migrate": "prisma migrate dev"
+    "db": "prisma migrate dev"
   },
   "keywords": [],
   "author": "",

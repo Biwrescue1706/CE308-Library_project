@@ -25,7 +25,7 @@ export default function HomeScreen() {
     axios
       .get(`${API_URL}/books/getAllBooks`, { withCredentials: true })
       .then((res) => setBooks(res.data))
-      .catch((err) => console.error("❌ ดึงหนังสือผิดพลาด:", err));
+      .catch();
   };
 
   useFocusEffect(

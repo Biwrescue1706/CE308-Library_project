@@ -73,9 +73,9 @@ export default function CartScreen() {
       .post(
         `${API_URL}/loans/borrow-multiple`,
         {
-          items: items.map((item) => ({
+          item: items.map((item) => ({
             bookId: item.book.id,
-            quantity: item.quantity ?? 1,
+            borrowedQuantity: item.quantity ?? 1,
           })),
         },
         { withCredentials: true }
@@ -86,7 +86,7 @@ export default function CartScreen() {
         router.replace("/(tabs)/history");
       })
       .catch((err) => {
-        console.error("❌ ยืมไม่สำเร็จ:", err);
+        console.error("❌ ยืมไม่สำเร็จ:", err.response?.data || err);
         Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถยืมหนังสือได้");
       });
   };
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   qtyText: {
     fontSize: 20,
     fontWeight: "bold",
-    margin : 5,
+    margin: 5,
   },
   qtyDisplay: {
     fontSize: 16,

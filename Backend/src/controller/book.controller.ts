@@ -9,7 +9,6 @@ import { z, ZodError } from "zod";
 const BookSchema = z.object({
   title: z.string().min(1, "จำเป็นต้องมีชื่อเรื่อง"),
   author: z.string().min(1, "จำเป็นต้องมีผู้เขียน"),
-  description: z.string().optional(),
   category: z.string().min(1, "หมวดหมู่เป็นสิ่งจำเป็น"),
   totalCopies: z.number().int().positive("จำนวนสำเนาทั้งหมดต้องเป็นค่าบวก"),
   availableCopies: z.number().optional(),

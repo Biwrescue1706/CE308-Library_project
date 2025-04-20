@@ -11,7 +11,7 @@ import Constants from "expo-constants";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 const screenWidth = Dimensions.get("window").width;
-const cardWidth = (screenWidth - 60) / 2; // padding + spacing
+const cardWidth = screenWidth - 40; // full width - padding
 
 export default function ActiveLoansScreen() {
   const [loans, setLoans] = useState<any[]>([]);
@@ -30,18 +30,17 @@ export default function ActiveLoansScreen() {
       <FlatList
         data={loans}
         keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
         contentContainerStyle={styles.list}
         renderItem={({ item, index }) => (
           <View style={styles.card}>
-            <Text style={styles.titlebold}>#{index + 1} - {item.title}</Text>
-            <Text><Text style={styles.bold}>👤 UserName:</Text> {item.username}</Text>
-            <Text><Text style={styles.bold}>👤 ชื่อผู้ยืม:</Text> {item.fullNameTH}</Text>
-            <Text><Text style={styles.bold}>📅 ยืม:</Text> {new Date(item.loanDate).toLocaleDateString()}</Text>
-            <Text><Text style={styles.bold}>📅 ครบกำหนด:</Text> {new Date(item.dueDate).toLocaleDateString()}</Text>
-            <Text><Text style={styles.bold}>📦 จำนวน:</Text> {item.quantity} เล่ม</Text>
-            <Text><Text style={styles.bold}>📞 โทร:</Text> {item.phone}</Text>
+            <Text style={styles.titlebold}>รายการการยืมที่ {index + 1}</Text>
+            <Text><Text style={styles.bold}>📚 ชื่อหนังสือ :  {item.title}</Text></Text> 
+            <Text><Text style={styles.bold}>👤 Username : </Text> {item.username}</Text>
+            <Text><Text style={styles.bold}>👤 ชื่อผู้ยืม : </Text> {item.fullNameTH}</Text>
+            <Text><Text style={styles.bold}>📅 วันยืม : </Text> {item.loanDate}</Text>
+            <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text> {item.dueDate}</Text>
+            <Text><Text style={styles.bold}>📦 จำนวน : </Text> {item.borrowedQuantity} เล่ม</Text>
+            <Text><Text style={styles.bold}>📞 โทร : </Text> {item.phone}</Text>
           </View>
         )}
         ListEmptyComponent={
@@ -53,12 +52,10 @@ export default function ActiveLoansScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#C8E6B2",
-    paddingTop: 20,
   },
   list: {
     paddingHorizontal: 20,
@@ -74,8 +71,8 @@ const styles = StyleSheet.create({
     margin: 10,
     marginRight : 10,
     height: 50,
-    width: 350,
-    justifyContent: "center",
+    width: 340,
+    borderRadius: 10,
   },
   card: {
     backgroundColor: "#fff",
@@ -92,5 +89,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 4,
+    textAlign: "center",
   },
 });

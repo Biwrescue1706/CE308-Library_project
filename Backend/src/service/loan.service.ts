@@ -1,23 +1,30 @@
 import { prisma } from "../utils/prisma";
+import { addDays, differenceInDays } from "date-fns";
 
-import { differenceInDays } from "date-fns";
-
-type BorrowRequestItem = { bookId: string; quantity: number };
+// ✅ ยืมหนังสือหลายเล่ม
+type BorrowRequestItem = {
+  bookId: string;
+  quantity: number;
+};
 
 export const borrowMultipleBooks = async (userId: string, items: BorrowRequestItem[]) => {
-  const result = [];
+  const results = [];
+
   for (const item of items) {
     const book = await prisma.book.findUnique({ where: { id: item.bookId } });
-    if (!book) throw new Error(`ไม่พบหนังสือ ${item.bookId}`);
-    if (book.availableCopies < item.quantity) throw new Error(`หนังสือ "${book.title}" คงเหลือไม่พอ`);
+    if (!book) throw new Error(`ไม่พบหนังสือรหัส: ${item.bookId}`);
+    if (book.availableCopies < item.quantity) {
+      throw new Error(`หนังสือ "${book.title}" เหลือไม่พอ (${book.availableCopies} เล่ม)`);
+    }
 
     const loan = await prisma.loan.create({
       data: {
         userId,
         bookId: item.bookId,
-        quantity: item.quantity,
+        borrowedQuantity: item.quantity,
+        returnedQuantity: 0,
         loanDate: new Date(),
-        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // กำหนดวันครบกำหนดคืน
+        dueDate: addDays(new Date(), 7),
         returned: false,
       },
     });
@@ -27,52 +34,113 @@ export const borrowMultipleBooks = async (userId: string, items: BorrowRequestIt
       data: { availableCopies: { decrement: item.quantity } },
     });
 
-    result.push(loan);
+    results.push(loan);
   }
-  return result;
+
+  return results;
 };
 
-export const returnBook = async (loanId: string) => {
+// ✅ คืนทีละเล่ม
+export const returnBook = async (loanId: string, quantity: number) => {
   const loan = await prisma.loan.findUnique({ where: { id: loanId } });
-  if (!loan || loan.returned) throw new Error("คืนไปแล้วหรือไม่พบข้อมูลการยืม");
+  if (!loan || loan.returned) throw new Error("ไม่พบข้อมูลหรือคืนครบแล้ว");
 
-  const returnDate = new Date();
-  let lateDays = 0;
-  if (loan.dueDate) {
-    lateDays = Math.max(differenceInDays(returnDate, loan.dueDate), 0);
-  }
+  const remaining = loan.borrowedQuantity - loan.returnedQuantity;
+  const returnQty = Math.min(quantity || remaining, remaining);
+  const updatedReturned = loan.returnedQuantity + returnQty;
+  const isFullyReturned = updatedReturned >= loan.borrowedQuantity;
+  const now = new Date();
+  const lateDays = isFullyReturned && loan.dueDate
+    ? Math.max(differenceInDays(now, loan.dueDate), 0)
+    : loan.lateDays ?? 0;
 
   const updatedLoan = await prisma.loan.update({
     where: { id: loanId },
     data: {
-      returned: true,
-      returnDate,
-      lateDays,
+      returnedQuantity: updatedReturned,
+      ...(isFullyReturned && {
+        returned: true,
+        returnDate: now,
+        lateDays,
+      }),
     },
   });
 
   await prisma.book.update({
     where: { id: loan.bookId },
-    data: { availableCopies: { increment: loan.quantity } },
+    data: { availableCopies: { increment: returnQty } },
   });
 
   return updatedLoan;
 };
 
+// ✅ คืนหลายเล่ม
+type ReturnItem = {
+  loanId: string;
+  quantity: number;
+};
+
+export const returnMultipleBooks = async (userId: string, items: ReturnItem[]) => {
+  const now = new Date();
+  const results = [];
+
+  for (const item of items) {
+    const loan = await prisma.loan.findUnique({
+      where: { id: item.loanId },
+      include: { book: true },
+    });
+
+    if (!loan || loan.userId !== userId || loan.returned) {
+      throw new Error(`ไม่พบหรือคืนครบแล้ว: ${item.loanId}`);
+    }
+
+    const remaining = loan.borrowedQuantity - loan.returnedQuantity;
+    const returnQty = Math.min(item.quantity, remaining);
+    const updatedReturned = loan.returnedQuantity + returnQty;
+    const isFullyReturned = updatedReturned >= loan.borrowedQuantity;
+    const lateDays = loan.dueDate ? Math.max(differenceInDays(now, loan.dueDate), 0) : loan.lateDays ?? 0;
+
+    const updatedLoan = await prisma.loan.update({
+      where: { id: item.loanId },
+      data: {
+        returnedQuantity: updatedReturned,
+        ...(isFullyReturned && {
+          returned: true,
+          returnDate: now,
+          lateDays,
+        }),
+      },
+    });
+
+    await prisma.book.update({
+      where: { id: loan.bookId },
+      data: { availableCopies: { increment: returnQty } },
+    });
+
+    results.push({
+      loanId: loan.id,
+      bookTitle: loan.book.title,
+      returnedQuantity: returnQty,
+      fullyReturned: isFullyReturned,
+      lateDays: isFullyReturned ? lateDays : 0,
+    });
+  }
+
+  return results;
+};
+
+// ✅ ดึงรายการยืมของผู้ใช้
 export const getLoansByUser = async (userId: string) => {
   return prisma.loan.findMany({
     where: { userId },
-    include: {
-      book: true,
-    },
-    orderBy: {
-      loanDate: "desc",
-    },
+    include: { book: true },
+    orderBy: { loanDate: "desc" },
   });
 };
 
+// ✅ ดึงรายการยืมทั้งหมด (admin)
 export const getAllLoans = async () => {
-  const loans = await prisma.loan.findMany({
+  return prisma.loan.findMany({
     include: {
       user: {
         select: {
@@ -84,41 +152,15 @@ export const getAllLoans = async () => {
           lastNameTH: true,
         },
       },
-      book: {
-        select: {
-          title: true,
-        },
-      },
+      book: { select: { title: true } },
     },
-    orderBy: {
-      loanDate: "desc",
-    },
-  });
-
-  return loans.map((loan) => {
-    const lateDays = loan.returnDate && loan.dueDate && loan.returnDate > loan.dueDate
-      ? Math.ceil((+loan.returnDate - +loan.dueDate!) / (1000 * 60 * 60 * 24))
-      : 0;
-
-    return {
-      id: loan.id,
-      username: loan.user.username,
-      memberId: loan.user.memberId,
-      fullNameTH: `${loan.user.titleTH}${loan.user.firstNameTH} ${loan.user.lastNameTH}`,
-      phone: loan.user.phone,
-      title: loan.book.title,
-      quantity: loan.quantity,
-      loanDate: loan.loanDate,
-      dueDate: loan.dueDate,
-      returnDate: loan.returnDate,
-      returned: loan.returned,
-      lateDays,
-    };
+    orderBy: { loanDate: "desc" },
   });
 };
 
+// ✅ ดึงรายการที่ยังไม่คืน (admin)
 export const getActiveLoans = async () => {
-  const loans = await prisma.loan.findMany({
+  return prisma.loan.findMany({
     where: { returned: false },
     include: {
       user: {
@@ -131,36 +173,39 @@ export const getActiveLoans = async () => {
           lastNameTH: true,
         },
       },
-      book: {
+      book: { select: { title: true } },
+    },
+    orderBy: { loanDate: "desc" },
+  });
+};
+
+// ✅ ดึงรายการที่เกินกำหนดคืน (admin)
+export const getOverdueLoans = async () => {
+  const today = new Date();
+
+  const loans = await prisma.loan.findMany({
+    where: {
+      returned: false,
+      dueDate: { lt: today },
+    },
+    include: {
+      user: {
         select: {
-          title: true,
+          memberId: true,
+          username: true,
+          phone: true,
+          titleTH: true,
+          firstNameTH: true,
+          lastNameTH: true,
         },
       },
+      book: { select: { title: true } },
     },
-    orderBy: {
-      loanDate: "desc",
-      dueDate: "desc",
-    },
+    orderBy: { dueDate: "asc" },
   });
 
-  return loans.map((loan) => {
-    const lateDays = loan.returnDate && loan.dueDate && loan.returnDate > loan.dueDate
-      ? Math.ceil((+loan.returnDate - +loan.dueDate!) / (1000 * 60 * 60 * 24))
-      : 0;
-
-    return {
-      id: loan.id,
-      username: loan.user.username,
-      memberId: loan.user.memberId,
-      fullNameTH: `${loan.user.titleTH}${loan.user.firstNameTH} ${loan.user.lastNameTH}`,
-      phone: loan.user.phone,
-      title: loan.book.title,
-      quantity: loan.quantity,
-      loanDate: loan.loanDate,
-      dueDate: loan.dueDate,
-      returnDate: loan.returnDate,
-      returned: loan.returned,
-      lateDays,
-    };
-  });
+  return loans.map((loan) => ({
+    ...loan,
+    lateDays: differenceInDays(today, loan.dueDate!),
+  }));
 };

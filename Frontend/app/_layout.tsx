@@ -32,6 +32,8 @@ export default function RootLayout() {
       <Stack.Screen name="manageAdmin/allLoans" options={{ headerShown: false }} />
       <Stack.Screen name="manageAdmin/activeLoans" options={{ headerShown: false }} />
       <Stack.Screen name="manageAdmin/overdueLoans" options={{ headerShown: false }} />
+      <Stack.Screen name="manageAdmin/topBorrowed" options={{ headerShown: false }} />
+      
       
       {/* book */}
       <Stack.Screen name="book/[id]" options={{ headerShown: false }} />

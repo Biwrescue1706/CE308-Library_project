@@ -22,12 +22,12 @@ model User {
   titleTH          String //คำนำหน้าไทย
   firstNameTH      String //ชื่อไทย
   lastNameTH       String //นามสกุลไทย
-  titleEN          String? //คำนำหน้าอังกฤษ
-  firstNameEN      String? //ชื่ออังกฤษ
-  lastNameEN       String? //นามสกุลอังกฤษ
   birthDate        DateTime //วันเกิด
   phone            String //โทรศัพท์ 
   role             String   @default("user") // เช่น admin, user 
+  titleEN          String? //คำนำหน้าอังกฤษ
+  firstNameEN      String? //ชื่ออังกฤษ
+  lastNameEN       String? //นามสกุลอังกฤษ
   houseNumber      String? //บ้านเลขที่
   villageNo        String? //หมู่
   alley            String? //ซอย
@@ -49,7 +49,6 @@ model Book {
   id              String   @id @default(uuid())
   title           String // ชื่อหนังสือ
   author          String // ผู้เขียน
-  description     String? // คำอธิบายหนังสือ
   category        String // หมวดหมู่ของหนังสือ
   availableCopies Int // จำนวนสำเนาที่สามารถยืมได้
   totalCopies     Int // จำนวนสำเนาทั้งหมด
@@ -64,19 +63,21 @@ model Book {
 }
 
 model Loan {
-  id         String    @id @default(uuid())
-  userId     String // รหัสผู้ใช้งาน
-  bookId     String // รหัสหนังสือ
-  quantity   Int       @default(1)
-  loanDate   DateTime  @default(now()) // วันที่ยืม
-  dueDate    DateTime? // วันที่กำหนดคืน
-  returnDate DateTime? // วันที่คืนจริง
-  lateDays   Int? // จำนวนวันที่คืนล่าช้า
-  returned   Boolean   @default(false) // สถานะการคืนหนังสือ
-  createdAt  DateTime  @default(now())
-  updateAt   DateTime  @updatedAt
-  user       User      @relation(fields: [userId], references: [id])
-  book       Book      @relation(fields: [bookId], references: [id])
+  id               String    @id @default(uuid())
+  userId           String // รหัสผู้ใช้งาน
+  bookId           String // รหัสหนังสือ
+  borrowedQuantity Int       @default(1) // ✅ จำนวนที่ยืมทั้งหมด
+  returnedQuantity Int       @default(0) // ✅ จำนวนที่คืนแล้ว
+  loanDate         DateTime  @default(now()) // วันที่ยืม
+  dueDate          DateTime? // วันที่กำหนดคืน
+  returnDate       DateTime? // วันที่คืนครั้งสุดท้าย
+  lateDays         Int? // จำนวนวันที่คืนล่าช้า
+  returned         Boolean   @default(false) // ✅ คืนครบหรือยัง
+  createdAt        DateTime  @default(now())
+  updateAt         DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
 }
 
 model Cart {
