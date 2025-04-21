@@ -99,6 +99,7 @@ export default function RegisterScreen() {
         role: "user",
       });
       router.replace("/login");
+      Alert.alert("✅ สมัครสมาชิกสําเร็จ", "ไปยังหน้าเข้าสู่ระบบ");
     } catch (error: any) {
       console.error("❌ Register error:", error.response?.data || error.message);
       Alert.alert(

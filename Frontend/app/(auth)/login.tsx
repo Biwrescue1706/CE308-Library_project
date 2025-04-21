@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -21,11 +14,15 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    if (!usernameOrEmail || !password) {
-      Alert.alert("⚠️ กรุณากรอกชื่อผู้ใช้และรหัสผ่านให้ครบถ้วน");
+    if (!usernameOrEmail) {
+      Alert.alert("⚠️ กรุณากรอกชื่อผู้ใช้หรือ Email", "กรุณากรอกชื่อผู้ใช้หรือ Email ให้ถูกต้อง");
       return;
     }
-
+    if (!password) {
+      Alert.alert("⚠️ กรุณากรอกรหัสผ่าน", "กรุณากรอกรหัสผ่านให้ถูกต้อง");
+      return;
+    }
+    
     try {
       const res = await axios.post(
         `${API_URL}/users/login`,
@@ -37,12 +34,20 @@ export default function LoginScreen() {
 
       if (user.role === "admin") {
         router.replace("/(tabs)/account");
+        console.log("ผู้ดูแลระบบได้เข้าสู่ระบบแล้ว");
+        Alert.alert("เข้าสู่ระบบสําเร็จ", "ยินดีต้อนรับเข้าสู่ระบบผู้ดูแลระบบ");
       } else {
         router.replace("/");
+        console.log("ผู้ใช้งานได้เข้าสู่ระบบแล้ว");
+        Alert.alert("เข้าสู่ระบบสําเร็จ", "ยินดีต้อนรับเข้าสู่ระบบผู้ใช้งาน");
       }
     } catch (err: any) {
       console.error("❌ Login error:", err.response?.data || err.message);
-      Alert.alert("เกิดข้อผิดพลาด", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      if (err.response?.status === 401) {
+        Alert.alert("เกิดข้อผิดพลาด", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      } else {
+        Alert.alert("เกิดข้อผิดพลาด", "มีปัญหากับการเชื่อมต่อ โปรดลองใหม่");
+      }
     }
   };
 

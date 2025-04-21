@@ -24,8 +24,13 @@ export default function HomeScreen() {
   const fetchBooks = () => {
     axios
       .get(`${API_URL}/books/getAllBooks`, { withCredentials: true })
-      .then((res) => setBooks(res.data))
-      .catch();
+      .then((res) => {
+        const sortedBooks = res.data.sort((a: any, b: any) =>
+          a.title.localeCompare(b.title)
+        );
+        setBooks(sortedBooks);
+      })
+      .catch((error) => console.error(error));
   };
 
   useFocusEffect(
@@ -53,8 +58,7 @@ export default function HomeScreen() {
       <FlatList
         data={paginatedBooks}
         keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
+        numColumns={1}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -69,8 +73,7 @@ export default function HomeScreen() {
             </Text>
             <TouchableOpacity
               style={styles.detailButton}
-              onPress={() =>
-                router.push(`/book/${item.id}`)}
+              onPress={() => router.push(`/book/${item.id}`)}
             >
               <Text style={styles.detailText}>🔍 ดูรายละเอียด</Text>
             </TouchableOpacity>
@@ -117,24 +120,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#C8E6B2",
-    padding: 20,
+    padding: 5,
   },
   header: {
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 15,
+    marginBottom: 10,
     backgroundColor: "#D0E8FF",
-    paddingVertical: 10,
+    paddingVertical: 5,
     borderRadius: 10,
   },
   bookContainer: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    width: "48%",
+    padding: 20,
+    borderRadius: 20,
+    width: "90%",  // Set width to 30% for 3 columns
     marginBottom: 15,
+    marginRight: 15,
+    marginLeft: 15,
     elevation: 3,
+    justifyContent: "center",
   },
   bookTitle: {
     fontSize: 16,

@@ -26,7 +26,6 @@ export default function ResetPasswordScreen() {
       Alert.alert("กรุณากรอกข้อมูลให้ครบ");
       return;
     }
-
     if (newPassword !== confirmPassword) {
       Alert.alert("รหัสผ่านไม่ตรงกัน");
       return;
@@ -39,7 +38,7 @@ export default function ResetPasswordScreen() {
       });
 
       Alert.alert("สำเร็จ", "คุณได้ตั้งรหัสผ่านใหม่แล้ว");
-      router.replace("/login");
+      router.replace("/(auth)/login");
     } catch (err: any) {
       console.error("❌ Reset password error:", err.response?.data || err.message);
       Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถรีเซ็ตรหัสผ่านได้");

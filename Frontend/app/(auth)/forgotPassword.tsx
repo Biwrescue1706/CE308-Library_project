@@ -37,8 +37,10 @@ export default function ForgotPasswordScreen() {
             const { userId } = res.data;
 
             router.push({ pathname: "/(auth)/resetPassword", params: { userId } });
+            console.error("พบบัญชีผู้ใช้หรืออีเมล");
+            Alert.alert("พบบัญชีผู้ใช้หรืออีเมลถูกต้อง ","ไปยังหน้ารีเซ็ตรหัสผ่าน" );
         } catch (err: any) {
-            console.error("❌ Forgot password error:", err.response?.data || err.message);
+            console.error("ไม่พบบัญชีผู้ใช้หรืออีเมล");
             Alert.alert("ไม่พบผู้ใช้งาน", err.response?.data?.message || "เกิดข้อผิดพลาด");
         } finally {
             setLoading(false);
@@ -50,10 +52,10 @@ export default function ForgotPasswordScreen() {
             <View style={styles.box}>
                 <Text style={styles.header}>🔐 ลืมรหัสผ่าน</Text>
 
-                <Text style={styles.label}> ใส่อีเมล</Text>
+                <Text style={styles.label}> ใส่อีเมล หรือ Username</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="ระบุ email"
+                    placeholder="ระบุ email หรือ Username"
                     value={input}
                     onChangeText={setInput}
                     autoCapitalize="none"

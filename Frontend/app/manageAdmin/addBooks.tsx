@@ -191,55 +191,53 @@ export default function AddBooksScreen() {
         <Text style={styles.buttonText}>➕ สร้างหนังสือใหม่</Text>
       </TouchableOpacity>
 
-      <ScrollView horizontal>
-        <ScrollView style={{ maxHeight: 1000 }}>
-          <View>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.tableCell, styles.colIndex]}>ลำดับ</Text>
-              <Text style={[styles.tableCell, styles.colTitle]}>ชื่อหนังสือ</Text>
-              <Text style={[styles.tableCell, styles.colCreator]}>ผู้สร้าง</Text>
-              <Text style={[styles.tableCell, styles.colUpdater]}>ผู้แก้ไข</Text>
-              <Text style={[styles.tableCell, styles.colAction]}>แก้ไข</Text>
-              <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>ลบ</Text>
-            </View>
+      {/* Fixed Header for Table */}
+      <View style={styles.tableHeader}>
+        <Text style={[styles.tableCell, styles.colIndex]}>ลำดับ</Text>
+        <Text style={[styles.tableCell, styles.colTitle]}>ชื่อหนังสือ</Text>
+        <Text style={[styles.tableCell, styles.colCreator]}>ผู้สร้าง</Text>
+        <Text style={[styles.tableCell, styles.colUpdater]}>ผู้แก้ไข</Text>
+        <Text style={[styles.tableCell, styles.colAction]}>แก้ไข</Text>
+        <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>ลบ</Text>
+      </View>
 
-            {books.map((book, index) => (
-              <View key={book.id} style={styles.tableRow}>
-                <Text style={[styles.tableCell, styles.colIndex]}>{index + 1}</Text>
-                <Text style={[styles.tableCell, styles.colTitle]}>{book.title}</Text>
-                <Text style={[styles.tableCell, styles.colCreator]}>{book.createdBy?.username || "-"}</Text>
-                <Text style={[styles.tableCell, styles.colUpdater]}>{book.updatedBy?.username || "-"}</Text>
-                <Text style={[styles.tableCell, styles.colAction]}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, { backgroundColor: "#ffc107" }]}
-                    onPress={() => {
-                      setForm({
-                        title: book.title,
-                        author: book.author,
-                        category: book.category,
-                        totalCopies: book.totalCopies.toString(),
-                        availableCopies: book.availableCopies.toString(),
-                      });
-                      setIsEditMode(true);
-                      setEditingBookId(book.id);
-                      setModalVisible(true);
-                    }}
-                  >
-                    <Text style={styles.actionText}>✏️ แก้ไขหนังสือ</Text>
-                  </TouchableOpacity>
-                </Text>
-                <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, { backgroundColor: "#dc3545" }]}
-                    onPress={() => handleDelete(book.id)}
-                  >
-                    <Text style={styles.actionText}>🗑️ ลบหนังสือ</Text>
-                  </TouchableOpacity>
-                </Text>
-              </View>
-            ))}
+      {/* Scrollable Table Rows */}
+      <ScrollView style={{ maxHeight: 1500 }}>
+        {books.map((book, index) => (
+          <View key={book.id} style={styles.tableRow}>
+            <Text style={[styles.tableCell, styles.colIndex]}>{index + 1}</Text>
+            <Text style={[styles.tableCell, styles.colTitle]}>{book.title}</Text>
+            <Text style={[styles.tableCell, styles.colCreator]}>{book.createdBy?.username || "-"}</Text>
+            <Text style={[styles.tableCell, styles.colUpdater]}>{book.updatedBy?.username || "-"}</Text>
+            <Text style={[styles.tableCell, styles.colAction]}>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: "#ffc107" }]}
+                onPress={() => {
+                  setForm({
+                    title: book.title,
+                    author: book.author,
+                    category: book.category,
+                    totalCopies: book.totalCopies.toString(),
+                    availableCopies: book.availableCopies.toString(),
+                  });
+                  setIsEditMode(true);
+                  setEditingBookId(book.id);
+                  setModalVisible(true);
+                }}
+              >
+                <Text style={styles.actionText}>✏️ แก้ไขหนังสือ</Text>
+              </TouchableOpacity>
+            </Text>
+            <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: "#dc3545" }]}
+                onPress={() => handleDelete(book.id)}
+              >
+                <Text style={styles.actionText}>🗑️ ลบหนังสือ</Text>
+              </TouchableOpacity>
+            </Text>
           </View>
-        </ScrollView>
+        ))}
       </ScrollView>
 
       <Modal visible={modalVisible} animationType="slide">
@@ -296,7 +294,7 @@ const getLabel = (key: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: "#C8E6B2",
   },
   center: {
@@ -327,28 +325,28 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#28a745",
-    padding: 15,
-    marginTop: 20,
+    padding: 10,
+    marginTop: 10,
     borderRadius: 10,
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 16,
   },
   tableHeader: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: "row",
     backgroundColor: "#fff",
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#000000",
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: "#000000",
     backgroundColor: "#fff",
   },
   tableCell: {
@@ -357,17 +355,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 4,
     borderRightWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#000000",
     textAlign: "center",
   },
   lastCell: {
     borderRightWidth: 0,
   },
   actionButton: {
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    paddingHorizontal: 2,
+    paddingVertical: 2,
     marginHorizontal: 2,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   actionText: {
     color: "#fff",
@@ -375,7 +373,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   colIndex: { width: 50 },
-  colTitle: { width: 200 },
+  colTitle: { width: 600 },
   colCreator: { width: 150 },
   colUpdater: { width: 150 },
   colAction: { width: 150 },
