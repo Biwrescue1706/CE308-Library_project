@@ -66,10 +66,7 @@ export default function HomeScreen() {
           <View style={styles.bookContainer}>
             <Text style={styles.bookTitle}>📖 {item.title}</Text>
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>หมวดหมู่:</Text> {item.category}
-            </Text>
-            <Text style={styles.bookText}>
-              <Text style={styles.bold}>เหลือ:</Text> {item.availableCopies} เล่ม
+              <Text style={styles.bold}>หมวดหมู่ :</Text> {item.category}
             </Text>
             <TouchableOpacity
               style={styles.detailButton}

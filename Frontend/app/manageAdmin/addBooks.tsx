@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, ScrollView, ActivityIndicator, Modal, RefreshControl,
+  Alert, ScrollView, ActivityIndicator, Modal,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -13,7 +13,6 @@ const API_URL = Constants.expoConfig?.extra?.API_URL;
 export default function AddBooksScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<any[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -61,14 +60,8 @@ export default function AddBooksScreen() {
       const sortedBooks = res.data.sort((a: any, b: any) => a.title.localeCompare(b.title));
       setBooks(sortedBooks);
     } catch (error) {
-      alert("❌ โหลดหนังสือไม่สําเร็จ");
+      alert("❌ โหลดหนังสือไม่สำเร็จ");
     }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchBooks();
-    setRefreshing(false);
   };
 
   const handleChange = (key: string, value: string) => {
@@ -175,8 +168,8 @@ export default function AddBooksScreen() {
 
   return (
     <ScrollView
+      style={{ backgroundColor: "#00FA9A" }}
       contentContainerStyle={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <Text style={styles.header}>📚 เพิ่มหนังสือใหม่</Text>
 
@@ -191,57 +184,52 @@ export default function AddBooksScreen() {
         <Text style={styles.buttonText}>➕ สร้างหนังสือใหม่</Text>
       </TouchableOpacity>
 
-      {/* Fixed Header for Table */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.tableCell, styles.colIndex]}>ลำดับ</Text>
-        <Text style={[styles.tableCell, styles.colTitle]}>ชื่อหนังสือ</Text>
-        <Text style={[styles.tableCell, styles.colCreator]}>ผู้สร้าง</Text>
-        <Text style={[styles.tableCell, styles.colUpdater]}>ผู้แก้ไข</Text>
-        <Text style={[styles.tableCell, styles.colAction]}>แก้ไข</Text>
-        <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>ลบ</Text>
-      </View>
-
-      {/* Scrollable Table Rows */}
-      <ScrollView style={{ maxHeight: 1500 }}>
-        {books.map((book, index) => (
-          <View key={book.id} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.colIndex]}>{index + 1}</Text>
-            <Text style={[styles.tableCell, styles.colTitle]}>{book.title}</Text>
-            <Text style={[styles.tableCell, styles.colCreator]}>{book.createdBy?.username || "-"}</Text>
-            <Text style={[styles.tableCell, styles.colUpdater]}>{book.updatedBy?.username || "-"}</Text>
-            <Text style={[styles.tableCell, styles.colAction]}>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: "#ffc107" }]}
-                onPress={() => {
-                  setForm({
-                    title: book.title,
-                    author: book.author,
-                    category: book.category,
-                    totalCopies: book.totalCopies.toString(),
-                    availableCopies: book.availableCopies.toString(),
-                  });
-                  setIsEditMode(true);
-                  setEditingBookId(book.id);
-                  setModalVisible(true);
-                }}
-              >
-                <Text style={styles.actionText}>✏️ แก้ไขหนังสือ</Text>
-              </TouchableOpacity>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.cardContainer}
+      >
+        {books.map((book) => (
+          <View key={book.id} style={styles.card}>
+            <Text style={styles.bookTitle}>📖 {book.title}</Text>
+            <Text style={styles.bookText}>
+              <Text style={styles.bold}>หมวดหมู่ :</Text> {book.category}
             </Text>
-            <Text style={[styles.tableCell, styles.colAction, styles.lastCell]}>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: "#dc3545" }]}
-                onPress={() => handleDelete(book.id)}
-              >
-                <Text style={styles.actionText}>🗑️ ลบหนังสือ</Text>
-              </TouchableOpacity>
+            <Text style={styles.bookText}>
+              <Text style={styles.bold}>เหลือ :</Text> {book.availableCopies} เล่ม
             </Text>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: "#D2691E" }]}
+              onPress={() => {
+                setForm({
+                  title: book.title,
+                  author: book.author,
+                  category: book.category,
+                  totalCopies: book.totalCopies.toString(),
+                  availableCopies: book.availableCopies.toString(),
+                });
+                setIsEditMode(true);
+                setEditingBookId(book.id);
+                setModalVisible(true);
+              }}
+            >
+              <Text style={styles.actionText}>✏️ แก้ไขหนังสือ</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, { backgroundColor: "#0000FF" }]}
+              onPress={() => handleDelete(book.id)}
+            >
+              <Text style={styles.actionText}>🗑️ ลบหนังสือ</Text>
+            </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
 
+      {/* Modal */}
       <Modal visible={modalVisible} animationType="slide">
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+          style={{ backgroundColor: "#FFE4B5" }}
+          contentContainerStyle={styles.modalContainer}
+        >
           <Text style={styles.header}>
             {isEditMode ? "✏️ แก้ไขหนังสือ" : "📖 เพิ่มหนังสือ"}
           </Text>
@@ -251,16 +239,18 @@ export default function AddBooksScreen() {
             .map((key) => (
               <View key={key}>
                 <Text style={styles.label}>{getLabel(key)}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={form[key as keyof typeof form]}
-                  onChangeText={(text) => handleChange(key, text)}
-                  keyboardType={
-                    key === "totalCopies" || key === "availableCopies"
-                      ? "numeric"
-                      : "default"
-                  }
-                />
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    style={styles.input}
+                    value={form[key as keyof typeof form]}
+                    onChangeText={(text) => handleChange(key, text)}
+                    keyboardType={
+                      key === "totalCopies" || key === "availableCopies"
+                        ? "numeric"
+                        : "default"
+                    }
+                  />
+                </View>
               </View>
             ))}
 
@@ -314,17 +304,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 15,
   },
-  input: {
+  inputContainer: {
+    backgroundColor: "#fff",  // White background for input
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#000000",
     borderRadius: 8,
     padding: 10,
+  },
+  input: {
     fontSize: 16,
-    marginTop: 5,
-    backgroundColor: "#fff",
+    backgroundColor: "#fff",  // Ensure the input background is white
   },
   button: {
-    backgroundColor: "#28a745",
+    backgroundColor: "#DC143C",
     padding: 10,
     marginTop: 10,
     borderRadius: 10,
@@ -335,46 +327,50 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  tableHeader: {
+  cardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginTop: 10,
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#000000",
+    marginBottom: 20,
   },
-  tableRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderColor: "#000000",
+  card: {
     backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    width: "48%",  // Card width for 2 items per row
+    marginBottom: 20,
+    elevation: 3,
   },
-  tableCell: {
-    flex: 1,
+  bookTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  bookText: {
     fontSize: 14,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRightWidth: 1,
-    borderColor: "#000000",
-    textAlign: "center",
+    marginBottom: 5,
   },
-  lastCell: {
-    borderRightWidth: 0,
+  bold: {
+    fontWeight: "bold",
   },
   actionButton: {
-    paddingHorizontal: 2,
-    paddingVertical: 2,
-    marginHorizontal: 2,
-    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 5,
+    marginTop: 5,
+    alignItems: "center",
   },
   actionText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 14,
   },
-  colIndex: { width: 50 },
-  colTitle: { width: 600 },
-  colCreator: { width: 150 },
-  colUpdater: { width: 150 },
-  colAction: { width: 150 },
+  modalContainer: {
+    padding: 4,
+    margin: 4,
+    backgroundColor: "#FFE4B5", // White background for the modal content
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 20,
+    flex: 1,
+  },
 });

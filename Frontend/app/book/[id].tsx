@@ -73,10 +73,10 @@ export default function BookDetailScreen() {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>📖 {book.title}</Text>
-        <Text style={styles.detail}>ผู้แต่ง: {book.author}</Text>
-        <Text style={styles.detail}>หมวดหมู่: {book.category}</Text>
-        <Text style={styles.detail}>คำอธิบาย: {book.description}</Text>
-        <Text style={styles.detail}>จำนวนที่เหลือ: {book.availableCopies}</Text>
+        <Text style={styles.detail}><Text style={styles.bold}>ผู้แต่ง : </Text> {book.author}</Text>
+        <Text style={styles.detail}><Text style={styles.bold}>📚 หมวดหมู่ : </Text> {book.category}</Text>
+        <Text style={styles.detail}><Text style={styles.bold}>คำอธิบาย : </Text>{book.description}</Text>
+        <Text style={styles.detail}><Text style={styles.bold}>จำนวนที่เหลือ : </Text>{book.availableCopies}</Text>
 
         <View style={styles.quantityRow}>
           <TouchableOpacity
@@ -112,13 +112,14 @@ export default function BookDetailScreen() {
           >
             <Text style={styles.quantityText}>+</Text>
           </TouchableOpacity>
+          <Text> </Text>
         </View>
-        <Text style={styles.maxNote}>สูงสุด {book.availableCopies} เล่ม</Text>
 
         {book.availableCopies > 0 ? (
           <>
+            <View style={{ height: 15 }} />
             <Button title="🛒 เพิ่มเข้าตะกร้า" onPress={handleAddToCart} />
-            <View style={{ height: 10 }} />
+            <View style={{ height: 15 }} />
             <Button title="📚 ยืมหนังสือ" onPress={handleBorrow} />
           </>
         ) : (
@@ -130,6 +131,9 @@ export default function BookDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  bold: {
+    fontWeight: "bold",
+  },
   container: {
     padding: 20,
     backgroundColor: "#00FA9A",
