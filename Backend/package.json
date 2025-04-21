@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "concurrently -n SERVER,TUNNEL -c green,cyan \"npm run server\" \"npm run tunnel\"",
+    "server": "nodemon src/index.ts",
+    "tunnel": "npx localtunnel --port 5000 --subdomain silly-pots-fix",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db": "prisma migrate dev"
   },
