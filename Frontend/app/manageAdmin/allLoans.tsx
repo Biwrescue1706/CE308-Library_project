@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
@@ -22,8 +16,8 @@ type Loan = {
   dueDate: string;
   borrowedQuantity: number;
   returned: boolean;
-  returnedQuantity: number; 
-  returnDate : string;
+  returnedQuantity: number;
+  returnDate: string;
 }
 
 export default function AllLoansScreen() {
@@ -41,7 +35,7 @@ export default function AllLoansScreen() {
 
   const renderItem = ({ item, index }: { item: Loan; index: number }) => {
     const remaining = item.borrowedQuantity - item.returnedQuantity;
-  
+
     return (
       <View style={styles.card}>
         <Text style={styles.titlebold}>รายการยืมที่ {index + 1}</Text>
@@ -62,7 +56,7 @@ export default function AllLoansScreen() {
       </View>
     );
   };
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>📚 รายการยืมทั้งหมด</Text>
@@ -83,7 +77,7 @@ export default function AllLoansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
     padding: 10,
   },
   header: {
@@ -101,7 +95,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    width: 340 ,
+    width: 340,
     marginBottom: 9.5,
     padding: 20,
     borderRadius: 10,

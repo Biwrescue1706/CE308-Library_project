@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-    ActivityIndicator,
-    ScrollView,
-    RefreshControl,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView, RefreshControl, } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 
@@ -109,7 +102,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
-        backgroundColor: "#C8E6B2",
+        backgroundColor: "#00FA9A",
     },
     centered: {
         flex: 1,

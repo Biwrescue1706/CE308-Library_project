@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 80,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
     flexGrow: 1,
   },
   container: {

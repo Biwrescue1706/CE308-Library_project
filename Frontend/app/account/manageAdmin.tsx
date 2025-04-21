@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   header: {
     fontSize: 24,

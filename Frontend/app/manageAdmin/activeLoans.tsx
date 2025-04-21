@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, Dimensions, } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 
@@ -34,7 +28,7 @@ export default function ActiveLoansScreen() {
         renderItem={({ item, index }) => (
           <View style={styles.card}>
             <Text style={styles.titlebold}>รายการการยืมที่ {index + 1}</Text>
-            <Text><Text style={styles.bold}>📚 ชื่อหนังสือ :  {item.title}</Text></Text> 
+            <Text><Text style={styles.bold}>📚 ชื่อหนังสือ :  {item.title}</Text></Text>
             <Text><Text style={styles.bold}>👤 Username : </Text> {item.username}</Text>
             <Text><Text style={styles.bold}>👤 ชื่อผู้ยืม : </Text> {item.fullNameTH}</Text>
             <Text><Text style={styles.bold}>📅 วันยืม : </Text> {item.loanDate}</Text>
@@ -55,7 +49,7 @@ export default function ActiveLoansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   list: {
     paddingHorizontal: 20,
@@ -66,10 +60,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 15,
     textAlign: "center",
-    alignItems : "center",
+    alignItems: "center",
     backgroundColor: "#fff",
     margin: 10,
-    marginRight : 10,
+    marginRight: 10,
     height: 50,
     width: 340,
     borderRadius: 10,

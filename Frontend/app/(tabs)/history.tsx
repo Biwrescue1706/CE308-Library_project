@@ -81,7 +81,6 @@ export default function HistoryScreen() {
     );
   }
 
-  // Check if there are books that need to be returned
   const hasReturnable = history.some(
     (item) => !item.returned && item.borrowedQuantity - item.returnedQuantity > 0
   );
@@ -92,20 +91,11 @@ export default function HistoryScreen() {
     const loanDateA = new Date(a.loanDate).getTime();
     const loanDateB = new Date(b.loanDate).getTime();
     if (loanDateA !== loanDateB) {
-      return loanDateA - loanDateB; // Sort by loan date from oldest to newest
+      return loanDateA - loanDateB; 
     }
     // Sort by title in Thai (A-Z, ก-ฮ)
-    return a.title.localeCompare(b.title, 'th-TH');  // Correct for Thai alphabet sorting
+    return a.title.localeCompare(b.title, 'th-TH'); 
   });
-
-  // Format date to Thai format (dd MMMM พ.ศ. yyyy)
-  const formatThaiDate = (dateString: string | Date): string => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString("th-TH", { month: "long" });
-    const year = date.getFullYear() + 543; // Convert to Thai year (Buddhist era)
-    return `${day} ${month} ${year}`;
-  };
 
   return (
     <View style={styles.container}>
@@ -201,7 +191,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
     padding: 20,
     justifyContent: "center",
   },

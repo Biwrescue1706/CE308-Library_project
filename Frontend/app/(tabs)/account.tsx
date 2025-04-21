@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  RefreshControl,
-  ScrollView,
-  Alert,
-  StyleSheet,
+  View, Text, TouchableOpacity, RefreshControl, ScrollView, Alert, StyleSheet,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -69,18 +63,39 @@ export default function AccountScreen() {
         <>
           <Text style={styles.header}>👤 บัญชีของฉัน</Text>
           <View style={styles.userInfoBox}>
-            <Text style={styles.infoText}>📧 อีเมล : {users.email}</Text>
-            <Text style={styles.infoText}>🆔 รหัสสมาชิก : {users.memberId}</Text>
-            <Text style={styles.infoText}>👤 ชื่อใช้งาน : {users.username}</Text>
             <Text style={styles.infoText}>
-              👤 ชื่อ ภาษาไทย : {users.titleTH} {users.firstNameTH} {users.lastNameTH}
+              <Text style={styles.bold}>
+                📧 อีเมล :
+              </Text> {users.email}
             </Text>
             <Text style={styles.infoText}>
-              👤 ชื่อ ภาษาอังกฤษ : {users.titleEN} {users.firstNameEN} {users.lastNameEN}
+              <Text style={styles.bold}>
+                🆔 รหัสสมาชิก :
+              </Text> {users.memberId}
             </Text>
-            <Text style={styles.infoText}>📞 เบอร์โทร : {users.phone}</Text>
             <Text style={styles.infoText}>
-              📅 วันสมัครสมาชิก : {formatThaiDate(users.registrationDate || users.createdAt)}
+              <Text style={styles.bold}>
+                👤 ชื่อใช้งาน :
+              </Text> {users.username}
+            </Text>
+            <Text style={styles.infoText}>
+              <Text style={styles.bold}>
+                👤 ชื่อ ภาษาไทย :
+              </Text> {users.titleTH} {users.firstNameTH} {users.lastNameTH}
+            </Text>
+            <Text style={styles.infoText}>
+              <Text style={styles.bold}>
+                👤 ชื่อ ภาษาอังกฤษ :
+              </Text> {users.titleEN} {users.firstNameEN} {users.lastNameEN}
+            </Text>
+            <Text style={styles.infoText}>
+              <Text style={styles.bold}>
+                📞 เบอร์โทร :
+              </Text>{users.phone}</Text>
+            <Text style={styles.infoText}>
+              <Text style={styles.bold}>
+                📅 วันสมัครสมาชิก :
+              </Text> {formatThaiDate(users.registrationDate || users.createdAt)}
             </Text>
           </View>
 
@@ -132,29 +147,36 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
+  bold: {
+    fontWeight: "bold",
+  },
   container: {
     flexGrow: 1,
     alignItems: "center",
-    backgroundColor: "#C8E6B2",
-    padding: 20,
+    backgroundColor: "#00FA9A",
+    padding: 10,
     justifyContent: "center",
   },
   header: {
     backgroundColor: "#fff",
     borderRadius: 12,
-    padding: 15,
-    fontSize: 22,
+    padding: 10,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
     shadowColor: "#000",
     width: "100%",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset:
+    {
+      width: 0,
+      height: 2
+    },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   button: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#FFDEAD",
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
@@ -163,8 +185,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 17,
+    color: "#000000",
+    fontSize: 16.5,
     fontWeight: "bold",
   },
   logoutButton: {
@@ -177,13 +199,17 @@ const styles = StyleSheet.create({
     width: "100%",
     marginVertical: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset:
+    {
+      width: 0,
+      height: 2
+    },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   infoText: {
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: 13.5,
+    marginBottom: 2,
   },
 });

@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  Platform,
-  Modal,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
+  Alert, ScrollView, Platform, Modal,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -294,7 +286,7 @@ export default function Inforpersonal() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   header: {
     fontSize: 24,

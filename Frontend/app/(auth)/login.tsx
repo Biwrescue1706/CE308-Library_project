@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   loginBox: {
     backgroundColor: "#fff",

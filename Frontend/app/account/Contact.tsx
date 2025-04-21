@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     padding: 20,
     flexGrow: 1,
     justifyContent: "center",
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   contactcontainer: {
     alignItems: "center",

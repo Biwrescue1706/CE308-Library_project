@@ -187,7 +187,7 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
     flexGrow: 1,
   },
   center: {

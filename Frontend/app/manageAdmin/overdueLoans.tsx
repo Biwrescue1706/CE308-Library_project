@@ -82,12 +82,12 @@ export default function OverdueLoansScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
   },
   header: {
     fontSize: 24,

@@ -132,7 +132,7 @@ export default function BookDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#C8E6B2",
+    backgroundColor: "#00FA9A",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
