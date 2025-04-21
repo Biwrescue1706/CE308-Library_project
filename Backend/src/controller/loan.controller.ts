@@ -200,33 +200,36 @@ export const returnBook = async (req: Request, res: Response): Promise<void> => 
 };
 
 // ✅ คืนทั้งหมด
-// ✅ คืนทั้งหมด
 export const returnAllBooks = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = (req as any).user;
+    const { returnData } = req.body; // [{ loanId, quantity }]
 
-    const activeLoans = await prisma.loan.findMany({
-      where: { userId: user.id, returned: false },
-      include: { book: true },
-    });
-
-    if (activeLoans.length === 0) {
-      res.status(400).json({ message: "ไม่มีรายการค้างคืน" });
+    if (!Array.isArray(returnData) || returnData.length === 0) {
+      res.status(400).json({ message: "ไม่มีข้อมูลรายการคืน" });
       return;
     }
 
     const now = new Date();
     const returnedBooks = await Promise.all(
-      activeLoans.map(async (loan) => {
+      returnData.map(async ({ loanId, quantity }) => {
+        const loan = await prisma.loan.findUnique({
+          where: { id: loanId },
+          include: { book: true },
+        });
+
+        if (!loan || loan.returned || loan.userId !== user.id) return null;
+
         const remaining = loan.borrowedQuantity - loan.returnedQuantity;
-        const updatedReturned = loan.returnedQuantity + remaining;
+        const returnQty = Math.min(quantity, remaining);
+        const updatedReturned = loan.returnedQuantity + returnQty;
         const isFullyReturned = updatedReturned >= loan.borrowedQuantity;
         const lateDays = isFullyReturned && loan.dueDate
           ? Math.max(differenceInDays(now, loan.dueDate), 0)
           : loan.lateDays ?? 0;
 
         await prisma.loan.update({
-          where: { id: loan.id },
+          where: { id: loanId },
           data: {
             returnedQuantity: updatedReturned,
             ...(isFullyReturned && {
@@ -239,21 +242,21 @@ export const returnAllBooks = async (req: Request, res: Response): Promise<void>
 
         await prisma.book.update({
           where: { id: loan.bookId },
-          data: { availableCopies: { increment: remaining } },
+          data: { availableCopies: { increment: returnQty } },
         });
 
         return {
           title: loan.book.title,
-          quantity: remaining,
+          quantity: returnQty,
           lateDays: isFullyReturned ? lateDays : 0,
         };
       })
     );
 
-    const bookListText = returnedBooks
-      .map(item =>
-        `- ${item.title} (${item.quantity} เล่ม)${item.lateDays > 0 ? ` ⏰ เกิน ${item.lateDays} วัน` : ""}`
-      ).join("\n");
+    const filtered = returnedBooks.filter(Boolean);
+    const bookListText = filtered.map(item =>
+      `- ${item!.title} (${item!.quantity} เล่ม)${item!.lateDays > 0 ? ` ⏰ เกิน ${item!.lateDays} วัน` : ""}`
+    ).join("\n");
 
     await sendLineMessage(
       `✅ คืนหนังสือทั้งหมด\n` +
@@ -262,7 +265,7 @@ export const returnAllBooks = async (req: Request, res: Response): Promise<void>
       `รายการที่คืน:\n${bookListText}`
     );
 
-    res.json({ message: "คืนหนังสือทั้งหมดสำเร็จ", returnedBooks });
+    res.json({ message: "คืนหนังสือทั้งหมดสำเร็จ", returnedBooks: filtered });
   } catch (err) {
     console.error("❌ returnAllBooks error:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการคืนทั้งหมด" });

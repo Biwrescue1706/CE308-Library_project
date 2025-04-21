@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  RefreshControl,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, RefreshControl, } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
@@ -28,17 +20,15 @@ export default function HistoryScreen() {
     axios
       .get(`${API_URL}/users/me`, { withCredentials: true })
       .then(() => {
-        setIsLoggedIn(true);
+        setIsLoggedIn(true); 
         return axios.get(`${API_URL}/loans/my-borrow`, { withCredentials: true });
       })
-      .then((res) => {
-        setHistory(res.data);
-        setRefreshing(false);
-      })
-      .catch(() => {
-        setIsLoggedIn(false);
-        setRefreshing(false);
-      });
+      .then((res) => { 
+        setHistory(res.data); 
+        setRefreshing(false); })
+      .catch(() => { 
+        setIsLoggedIn(false); 
+        setRefreshing(false); });
   };
 
   useEffect(() => {
@@ -49,7 +39,6 @@ export default function HistoryScreen() {
   const handleReturnBook = (loanId: string) => {
     const quantity = returnQuantities[loanId] || 1;
     const currentDate = new Date().toLocaleDateString();  // Capture current date
-
     axios
       .post(`${API_URL}/loans/return/${loanId}`, { quantity }, { withCredentials: true })
       .then(() => {
