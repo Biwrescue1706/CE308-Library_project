@@ -20,15 +20,17 @@ export default function HistoryScreen() {
     axios
       .get(`${API_URL}/users/me`, { withCredentials: true })
       .then(() => {
-        setIsLoggedIn(true); 
+        setIsLoggedIn(true);
         return axios.get(`${API_URL}/loans/my-borrow`, { withCredentials: true });
       })
-      .then((res) => { 
-        setHistory(res.data); 
-        setRefreshing(false); })
-      .catch(() => { 
-        setIsLoggedIn(false); 
-        setRefreshing(false); });
+      .then((res) => {
+        setHistory(res.data);
+        setRefreshing(false);
+      })
+      .catch(() => {
+        setIsLoggedIn(false);
+        setRefreshing(false);
+      });
   };
 
   useEffect(() => {
@@ -91,10 +93,10 @@ export default function HistoryScreen() {
     const loanDateA = new Date(a.loanDate).getTime();
     const loanDateB = new Date(b.loanDate).getTime();
     if (loanDateA !== loanDateB) {
-      return loanDateA - loanDateB; 
+      return loanDateA - loanDateB;
     }
     // Sort by title in Thai (A-Z, ก-ฮ)
-    return a.title.localeCompare(b.title, 'th-TH'); 
+    return a.title.localeCompare(b.title, 'th-TH');
   });
 
   return (
@@ -110,24 +112,24 @@ export default function HistoryScreen() {
           return (
             <View style={styles.historyContainer}>
               <Text style={styles.bookTitle}>📖 {item.title}</Text>
-              <Text><Text style={styles.bold}>📦 ยืมทั้งหมด: </Text>{item.borrowedQuantity} เล่ม</Text>
-              <Text><Text style={styles.bold}>📦 คืนแล้ว: </Text>{item.returnedQuantity} เล่ม</Text>
-              <Text><Text style={styles.bold}>📦 ค้างคืน: </Text>{remaining} เล่ม</Text>
-              <Text><Text style={styles.bold}>📅 วันที่ยืม: </Text>{item.loanDate}</Text>
-              <Text><Text style={styles.bold}>⏳ ครบกำหนด: </Text>{item.dueDate}</Text>
+              <Text><Text style={styles.bold}>📦 ยืมทั้งหมด : </Text>{item.borrowedQuantity} เล่ม</Text>
+              <Text><Text style={styles.bold}>📦 คืนแล้ว : </Text>{item.returnedQuantity} เล่ม</Text>
+              <Text><Text style={styles.bold}>📦 ค้างคืน : </Text>{remaining} เล่ม</Text>
+              <Text><Text style={styles.bold}>📅 วันที่ยืม : </Text>{item.loanDate}</Text>
+              <Text><Text style={styles.bold}>⏳ ครบกำหนด : </Text>{item.dueDate}</Text>
 
               {/* Display the return date */}
               {item.returned && item.returnDate ? (
-                <Text><Text style={styles.bold}>📅 วันที่คืน: </Text>{item.returnDate}</Text>
+                <Text><Text style={styles.bold}>📅 วันที่คืน : </Text>{item.returnDate}</Text>
               ) : (
-                <Text><Text style={styles.bold}>📅 วันที่คืน: </Text>ยังไม่คืน</Text>
+                <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> ⏳ ยังไม่ได้คืนหนังสือ</Text>
               )}
+              <Text style={styles.bold}>สถานะการคืน :
+                <Text style={{ color: item.returned ? "green" : "red" }}>
 
-              <Text style={{ color: item.returned ? "green" : "red" }}>
-                <Text style={styles.bold}>สถานะการคืน: </Text>
-                {item.returned ? "✅ คืนครบแล้ว" : "⏳ ยังไม่คืน"}
+                  {item.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ ยังไม่ได้คืนหนังสือ"}
+                </Text>
               </Text>
-
               {!item.returned && (
                 <>
                   <View style={styles.quantityRow}>

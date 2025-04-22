@@ -185,17 +185,31 @@ export default function AddBooksScreen() {
       </TouchableOpacity>
 
       <ScrollView
-        style={{ flex: 1 }}
+        style={{ margin: 5 }}
         contentContainerStyle={styles.cardContainer}
       >
-        {books.map((book) => (
+        {books.map((book, index) => (
           <View key={book.id} style={styles.card}>
-            <Text style={styles.bookTitle}>📖 {book.title}</Text>
+            <Text>
+              <Text style={styles.bookIndex}>📌 ลำดับ : {index + 1} </Text>
+            </Text>
+
+            <Text>
+              <Text style={styles.bookTitle}>📖 ชื่อหนังสือ :  </Text>
+              {book.title}
+            </Text>
+            
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>หมวดหมู่ :</Text> {book.category}
+              <Text style={styles.bold}>ผู้สร้างหนังสือ : </Text>
+              <Text> <Text>  {book.createdBy?.username || "-"}
+              </Text>
+              </Text>
+
             </Text>
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>เหลือ :</Text> {book.availableCopies} เล่ม
+              <Text style={styles.bold}>ผู้แก้ไขหนังสือ :</Text> <Text>
+                <Text>  {book.updatedBy?.username || "-"} </Text>
+              </Text>
             </Text>
             <TouchableOpacity
               style={[styles.actionButton, { backgroundColor: "#D2691E" }]}
@@ -284,7 +298,7 @@ const getLabel = (key: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 15,
     backgroundColor: "#00FA9A",
   },
   center: {
@@ -331,14 +345,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginTop: 10,
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 30,
   },
   card: {
     backgroundColor: "#fff",
     padding: 15,
     borderRadius: 10,
-    width: "48%",  // Card width for 2 items per row
+    width: "100%",  // Card width for 2 items per row
     marginBottom: 20,
     elevation: 3,
   },
@@ -347,8 +361,15 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 5,
   },
+  bookIndex: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   bookText: {
-    fontSize: 14,
+    fontSize: 16,
     marginBottom: 5,
   },
   bold: {

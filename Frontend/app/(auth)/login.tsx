@@ -33,7 +33,7 @@ export default function LoginScreen() {
       const { user } = res.data;
 
       if (user.role === "admin") {
-        router.replace("/(tabs)/account");
+        router.replace("/");
         console.log("ผู้ดูแลระบบได้เข้าสู่ระบบแล้ว");
         Alert.alert("เข้าสู่ระบบสําเร็จ", "ยินดีต้อนรับเข้าสู่ระบบผู้ดูแลระบบ");
       } else {

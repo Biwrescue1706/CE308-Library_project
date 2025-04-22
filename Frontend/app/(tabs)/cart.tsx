@@ -62,7 +62,6 @@ export default function CartScreen() {
     axios
       .delete(`${API_URL}/cart/clear`, { withCredentials: true })
       .then(() => {
-        Alert.alert("✅ ล้างตะกร้าสำเร็จ");
         fetchCart();
       })
       .catch((err) => console.error("❌ ล้างตะกร้าไม่สำเร็จ:", err));

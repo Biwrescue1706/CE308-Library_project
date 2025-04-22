@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "tunnel": "npx localtunnel --port 5000 --subdomain silly-pots-fix",
     "db": "prisma migrate dev"
   },
   "keywords": [],

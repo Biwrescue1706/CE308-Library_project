@@ -50,7 +50,7 @@ export default function AllLoansScreen() {
         <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text>{item.dueDate}</Text>
         <Text>
           <Text style={styles.bold}>✅ คืนสถานะ : </Text>
-          {item.returned ? "✅ คืนครบแล้ว" : "❌ ยังไม่ครบ"}
+          {item.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ ยังไม่ได้คืนหนังสือ"}
         </Text>
         <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> {item.returnDate} </Text>
       </View>
