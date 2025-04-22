@@ -9,7 +9,7 @@ import { promises } from "dns";
 // LINE Messaging API
 const LINE_API_URL = "https://api.line.me/v2/bot/message/push";
 const LINE_GROUP_ID = "C5ea2bec79706873f7212a1dccd5c6702";
-const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || "YOUR_LINE_TOKEN";
+const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || "WBtqkdSyTJvF/CUH3UWiseH+Q61cmSJ8bQctxurcN4jDWZaeCii0Pfh27BM88S5wJ6GMyCocVk1/ns70lnsTLLTLy1jLiFjLATYgetkNgW6ZShb1/3Yint3caetYvC8BjUxEqoGyPs/4mH6ZIlMs7wdB04t89/1O/w1cDnyilFU=";
 
 const sendLineMessage = async (message: string) => {
   try {
