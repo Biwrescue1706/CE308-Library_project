@@ -185,7 +185,7 @@ export default function AddBooksScreen() {
       </TouchableOpacity>
 
       <ScrollView
-        style={{ margin: 5 }}
+        style={{ margin: 15 }}
         contentContainerStyle={styles.cardContainer}
       >
         {books.map((book, index) => (
@@ -198,7 +198,7 @@ export default function AddBooksScreen() {
               <Text style={styles.bookTitle}>📖 ชื่อหนังสือ :  </Text>
               {book.title}
             </Text>
-            
+
             <Text style={styles.bookText}>
               <Text style={styles.bold}>ผู้สร้างหนังสือ : </Text>
               <Text> <Text>  {book.createdBy?.username || "-"}
@@ -207,7 +207,7 @@ export default function AddBooksScreen() {
 
             </Text>
             <Text style={styles.bookText}>
-              <Text style={styles.bold}>ผู้แก้ไขหนังสือ :</Text> <Text>
+              <Text style={styles.bold}>ผู้แก้ไขหนังสือ : </Text> <Text>
                 <Text>  {book.updatedBy?.username || "-"} </Text>
               </Text>
             </Text>
@@ -241,7 +241,7 @@ export default function AddBooksScreen() {
       {/* Modal */}
       <Modal visible={modalVisible} animationType="slide">
         <ScrollView
-          style={{ backgroundColor: "#FFE4B5" }}
+          style={{ height: 350 , backgroundColor: "#00FA9A" }}
           contentContainerStyle={styles.modalContainer}
         >
           <Text style={styles.header}>
@@ -298,7 +298,7 @@ const getLabel = (key: string) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    padding: 10,
     backgroundColor: "#00FA9A",
   },
   center: {
@@ -310,7 +310,10 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 0,
+    borderRadius: 20,
+    width: "100%",
+    padding: 10,
+    marginBottom: 5,
     textAlign: "center",
     backgroundColor: "#fff",
   },
@@ -322,7 +325,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",  // White background for input
     borderWidth: 1,
     borderColor: "#000000",
-    borderRadius: 8,
+    borderRadius: 25,
     padding: 10,
   },
   input: {
@@ -332,8 +335,9 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#DC143C",
     padding: 10,
-    marginTop: 10,
-    borderRadius: 10,
+    margin: 5,
+    marginBottom: 5,
+    borderRadius: 20,
     alignItems: "center",
   },
   buttonText: {
@@ -345,15 +349,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginTop: 20,
-    marginBottom: 30,
+    marginTop: 3,
+    marginBottom: 3,
   },
   card: {
     backgroundColor: "#fff",
-    padding: 15,
+    padding: 10,
     borderRadius: 10,
     width: "100%",  // Card width for 2 items per row
-    marginBottom: 20,
+    marginBottom: 10,
     elevation: 3,
   },
   bookTitle: {
@@ -384,14 +388,16 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: "#fff",
+    borderRadius: 20,
     fontWeight: "bold",
   },
   modalContainer: {
-    padding: 4,
-    margin: 4,
+    width: "95%",
     backgroundColor: "#FFE4B5", // White background for the modal content
     borderTopLeftRadius: 10,
-    borderTopRightRadius: 20,
-    flex: 1,
+    marginLeft: 10,
+    marginRight: 10,
+    flexWrap: "wrap",
+    borderTopRightRadius: 10,
   },
 });

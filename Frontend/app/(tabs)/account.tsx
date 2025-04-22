@@ -65,37 +65,30 @@ export default function AccountScreen() {
           <View style={styles.userInfoBox}>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                📧 อีเมล :
-              </Text> {users.email}
+                📧 อีเมล : </Text> {users.email}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                🆔 รหัสสมาชิก :
-              </Text> {users.memberId}
+                🆔 รหัสสมาชิก : </Text> {users.memberId}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                👤 ชื่อใช้งาน :
-              </Text> {users.username}
+                👤 ชื่อใช้งาน : </Text> {users.username}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                👤 ชื่อ ภาษาไทย :
-              </Text> {users.titleTH} {users.firstNameTH} {users.lastNameTH}
+                👤 ชื่อ ภาษาไทย : </Text> {users.titleTH} {users.firstNameTH} {users.lastNameTH}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                👤 ชื่อ ภาษาอังกฤษ :
-              </Text> {users.titleEN} {users.firstNameEN} {users.lastNameEN}
+                👤 ชื่อ ภาษาอังกฤษ : </Text> {users.titleEN} {users.firstNameEN} {users.lastNameEN}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                📞 เบอร์โทร :
-              </Text>{users.phone}</Text>
+                📞 เบอร์โทร : </Text> {users.phone}</Text>
             <Text style={styles.infoText}>
               <Text style={styles.bold}>
-                📅 วันสมัครสมาชิก :
-              </Text> {formatThaiDate(users.registrationDate || users.createdAt)}
+                📅 วันสมัครสมาชิก : </Text> {formatThaiDate(users.registrationDate || users.createdAt)}
             </Text>
           </View>
 
@@ -124,7 +117,7 @@ export default function AccountScreen() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push("/account/contact")}
+            onPress={() => router.push("/account/Contact")}
           >
             <Text style={styles.buttonText}>ช่องทางติดต่อ</Text>
           </TouchableOpacity>

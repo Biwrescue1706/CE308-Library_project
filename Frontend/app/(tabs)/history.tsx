@@ -1,8 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, RefreshControl, } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -10,11 +20,9 @@ export default function HistoryScreen() {
   const router = useRouter();
   const [history, setHistory] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [returnQuantities, setReturnQuantities] = useState<Record<string, number>>({});
-  const [returnDates, setReturnDates] = useState<Record<string, string>>({});  // Track return dates
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  // Fetch borrow history
   const fetchHistory = () => {
     setRefreshing(true);
     axios
@@ -44,8 +52,8 @@ export default function HistoryScreen() {
     axios
       .post(`${API_URL}/loans/return/${loanId}`, { quantity }, { withCredentials: true })
       .then(() => {
-        setReturnDates((prev) => ({ ...prev, [loanId]: currentDate }));  // Store return date
-        fetchHistory();
+        setReturnQuantities((prev) => ({ ...prev, [loanId]: 0 }));  // Reset return quantity
+        fetchHistory();  // Refresh the list
       })
       .catch((err) => console.error("❌ Error returning book:", err));
   };
@@ -55,20 +63,23 @@ export default function HistoryScreen() {
     const returnable = history.filter(
       (item) => !item.returned && (item.borrowedQuantity - item.returnedQuantity) > 0
     );
-    Promise.all(
-      returnable.map((item) => {
-        const quantity =
-          returnQuantities[item.id] || (item.borrowedQuantity - item.returnedQuantity);
-        const currentDate = new Date().toLocaleDateString();  // Capture current date
-        return axios
-          .post(`${API_URL}/loans/return/${item.id}`, { quantity }, { withCredentials: true })
-          .then(() => {
-            setReturnDates((prev) => ({ ...prev, [item.id]: currentDate }));  // Store return date for all items
-          });
+
+    // Prepare the data for the return-all request
+    const returnData = returnable.map((item) => ({
+      loanId: item.id,
+      quantity: item.borrowedQuantity - item.returnedQuantity, // Number of books to return
+    }));
+
+    // Send the return-all request
+    axios
+      .post(`${API_URL}/loans/return-all`, { returnData }, { withCredentials: true })
+      .then(() => {
+        setReturnQuantities({});  // Reset return quantities for all items
+        fetchHistory();  // Refresh the list
       })
-    )
-      .then(() => fetchHistory())
-      .catch((err) => console.error("❌ Error returning all books:", err));
+      .catch((err) => {
+        console.error("❌ Error returning all books:", err);
+      });
   };
 
   // Check if the user is logged in
@@ -89,13 +100,11 @@ export default function HistoryScreen() {
 
   // Sort by loan date (from oldest to newest) and title (A-Z, and ก-ฮ)
   const sortedHistory = [...history].sort((a, b) => {
-    // Sort by loan date first (from earliest to latest)
     const loanDateA = new Date(a.loanDate).getTime();
     const loanDateB = new Date(b.loanDate).getTime();
     if (loanDateA !== loanDateB) {
       return loanDateA - loanDateB;
     }
-    // Sort by title in Thai (A-Z, ก-ฮ)
     return a.title.localeCompare(b.title, 'th-TH');
   });
 
@@ -118,18 +127,18 @@ export default function HistoryScreen() {
               <Text><Text style={styles.bold}>📅 วันที่ยืม : </Text>{item.loanDate}</Text>
               <Text><Text style={styles.bold}>⏳ ครบกำหนด : </Text>{item.dueDate}</Text>
 
-              {/* Display the return date */}
               {item.returned && item.returnDate ? (
                 <Text><Text style={styles.bold}>📅 วันที่คืน : </Text>{item.returnDate}</Text>
               ) : (
                 <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> ⏳ ยังไม่ได้คืนหนังสือ</Text>
               )}
+
               <Text style={styles.bold}>สถานะการคืน :
                 <Text style={{ color: item.returned ? "green" : "red" }}>
-
                   {item.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ ยังไม่ได้คืนหนังสือ"}
                 </Text>
               </Text>
+
               {!item.returned && (
                 <>
                   <View style={styles.quantityRow}>
