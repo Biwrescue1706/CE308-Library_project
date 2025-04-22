@@ -14,6 +14,7 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const [book, setBook] = useState<any>(null);
   const [quantity, setQuantity] = useState<number>(1);
+  const [borrowedQuantity, setBorrowedQuantity] = useState<number>(1);
 
   useEffect(() => {
     if (!id) return;
@@ -38,7 +39,7 @@ export default function BookDetailScreen() {
         router.push("/(tabs)/cart");
       })
       .catch((err) => {
-        Alert.alert("ไม่สามารถเพิ่มเข้าตะกร้าได้");
+        Alert.alert("ไม่สามารถเพิ่มเข้าตะกร้าได้","เนื่องจากคุณได้มีหนังสือเล่มนี้ในตะกร้าแล้ว");
       });
   };
 
@@ -48,7 +49,7 @@ export default function BookDetailScreen() {
       return;
     }
 
-    if (quantity > book.availableCopies) {
+    if (borrowedQuantity > book.availableCopies) {
       Alert.alert("❌", "จำนวนที่ต้องการยืมมากกว่าจำนวนที่มี");
       return;
     }
@@ -56,7 +57,7 @@ export default function BookDetailScreen() {
     axios
       .post(
         `${API_URL}/loans/borrow`,
-        { bookId: book.id, quantity },
+        { bookId: book.id, borrowedQuantity },
         { withCredentials: true }
       )
       .then(() => {
