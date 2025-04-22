@@ -40,6 +40,9 @@
         "projectId": "aa681999-6eb2-45da-9a73-a85f28e39b12"
       }
     },
-    "owner": "biwrescue1706"
+    "owner": "biwrescue1706",
+    "android": {
+      "package": "BiwBonng.Library"
+    }
   }
 }
