@@ -77,15 +77,6 @@ export default function TopBorrowedBooksScreen() {
             <Text style={styles.cardText}>
               <Text style={styles.bold}>จำนวนยืม : </Text> {book.count} เล่ม
             </Text>
-            <Text style={styles.cardText}>
-              <Text style={styles.bold}>ค้างคืน : </Text> {book.count} เล่ม
-            </Text>
-            <Text style={styles.cardText}>
-              <Text style={styles.bold}>คืนแล้ว : </Text> {book.count} เล่ม
-            </Text>
-            <Text style={styles.cardText}>
-              <Text style={styles.bold}>ค้างคืน : </Text> {book.count} เล่ม
-            </Text>
           </View>
         ))}
       </View>
