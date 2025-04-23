@@ -76,7 +76,6 @@ export default function BookDetailScreen() {
         <Text style={styles.title}>📖 {book.title}</Text>
         <Text style={styles.detail}><Text style={styles.bold}>ผู้แต่ง : </Text> {book.author}</Text>
         <Text style={styles.detail}><Text style={styles.bold}>📚 หมวดหมู่ : </Text> {book.category}</Text>
-        <Text style={styles.detail}><Text style={styles.bold}>คำอธิบาย : </Text>{book.description}</Text>
         <Text style={styles.detail}><Text style={styles.bold}>จำนวนที่เหลือ : </Text>{book.availableCopies}</Text>
 
         <View style={styles.quantityRow}>
