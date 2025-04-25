@@ -129,8 +129,8 @@ export default function ManageUsersScreen() {
         }
         renderItem={({ item }) => (
           <View style={styles.userCard}>
-            <Text style={styles.userTitle}>👤 Username: {item.username}</Text>
-            <Text>Role: {item.role}</Text>
+            <Text style={styles.userTitle}>👤 Username: </Text><Text style={styles.usernamebold}> {item.username}</Text>
+            <Text style={styles.userRole}>Role : </Text><Text style={styles.roleBold}>{item.role}</Text>
             <View style={styles.cardActions}>
               <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
                 <Text style={styles.buttonTextWhite}>✏️ แก้ไข</Text>
@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
   },
   userCard: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 15,
+    borderRadius: 20,
+    padding: 10,
     width: "48%",
     elevation: 2,
   },
   userTitle: {
-    fontSize: 16,
+    fontSize: 18.5,
     fontWeight: "bold",
     marginBottom: 5,
   },
@@ -314,5 +314,22 @@ const styles = StyleSheet.create({
   selectedRole: {
     backgroundColor: "#b3f0c6",
     borderColor: "#28a745",
+  },
+  usernamebold : {
+    fontSize :17.5,
+    fontWeight: "bold",
+    textAlign : "center",
+    marginBottom: 10,
+  },
+  userRole :{
+    fontSize: 18.5,
+    fontWeight: "bold",
+    marginBottom: 5,
+    textAlign : "center",
+  },
+  roleBold : {
+    fontSize :17.5,
+    fontWeight: "bold",
+    textAlign : "center",
   },
 });

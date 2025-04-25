@@ -32,7 +32,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "API_URL": "https://biwbong1706.loca.lt/api",
+      "API_URL": "https://biwbong.loca.lt/api",
       "router": {
         "origin": false
       },
