@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, } from "react-native";
+import {
+  View,Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import LoanCard from "../components/LoanCard"; // ✅ import component
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -15,10 +21,10 @@ type Loan = {
   loanDate: string;
   dueDate: string;
   borrowedQuantity: number;
-  returned: boolean;
   returnedQuantity: number;
   returnDate: string;
-}
+  returned: boolean;
+};
 
 export default function AllLoansScreen() {
   const router = useRouter();
@@ -29,33 +35,9 @@ export default function AllLoansScreen() {
     axios
       .get(`${API_URL}/loans/all`, { withCredentials: true })
       .then((res) => setLoans(res.data))
-      .catch((err) => console.error("❌", err))
+      .catch((err) => console.error("❌ Error fetching loans:", err))
       .finally(() => setLoading(false));
   }, []);
-
-  const renderItem = ({ item, index }: { item: Loan; index: number }) => {
-    const remaining = item.borrowedQuantity - item.returnedQuantity;
-
-    return (
-      <View style={styles.card}>
-        <Text style={styles.titlebold}>รายการยืมที่ {index + 1}</Text>
-        <Text><Text style={styles.bold}>📚 ชื่อหนังสือ : </Text>{item.title}</Text>
-        <Text><Text style={styles.bold}>👤 ผู้ยืม : </Text>{item.username}</Text>
-        <Text><Text style={styles.bold}>👤 รหัสสมาชิก : </Text>{item.memberId}</Text>
-        <Text><Text style={styles.bold}>📞 เบอร์โทร : </Text>{item.phone}</Text>
-        <Text><Text style={styles.bold}>📦 ยืมทั้งหมด : </Text>{item.borrowedQuantity} เล่ม</Text>
-        <Text><Text style={styles.bold}>📦 คืนแล้ว : </Text>{item.returnedQuantity} เล่ม</Text>
-        <Text><Text style={styles.bold}>📦 ค้างคืน : </Text>{remaining} เล่ม</Text>
-        <Text><Text style={styles.bold}>📅 วันยืม : </Text>{item.loanDate}</Text>
-        <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text>{item.dueDate}</Text>
-        <Text>
-          <Text style={styles.bold}>✅ คืนสถานะ : </Text>
-          {item.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ ยังไม่ได้คืนหนังสือ"}
-        </Text>
-        <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> {item.returnDate} </Text>
-      </View>
-    );
-  };
 
   return (
     <View style={styles.container}>
@@ -66,7 +48,9 @@ export default function AllLoansScreen() {
         <FlatList
           data={loans}
           keyExtractor={(item) => item.id}
-          renderItem={renderItem}
+          renderItem={({ item, index }) => (
+            <LoanCard loan={item} index={index} />
+          )}
           contentContainerStyle={styles.listContent}
         />
       )}
@@ -87,27 +71,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "#fff",
     width: 340,
-    height: 50,
+    alignSelf: "center",
     borderRadius: 10,
+    padding: 10,
   },
   listContent: {
     paddingBottom: 20,
-  },
-  card: {
-    backgroundColor: "#fff",
-    width: 340,
-    marginBottom: 9.5,
-    padding: 20,
-    borderRadius: 10,
-    elevation: 2,
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  titlebold: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
-    textAlign: "center",
   },
 });

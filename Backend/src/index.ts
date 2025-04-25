@@ -25,7 +25,7 @@ app.use("/api/loans", loanRoutes);
 app.use("/api/cart", cartRoutes);
 
 // ✅ แสดงข้อความเมื่อเปิดเซิร์ฟเวอร์
-app.get("/", (_req, res) => {
+app.get("/", (req, res) => {
     res.send("📚 Library API is running...");
 });
 

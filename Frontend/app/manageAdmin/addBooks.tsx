@@ -1,20 +1,26 @@
+// 📁 app/manageAdmin/addBooks.tsx
 import React, { useState, useEffect } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  Alert, ScrollView, ActivityIndicator, Modal,
+  View, Text, ScrollView, TouchableOpacity, Alert,
+  StyleSheet, Modal, ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
-import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+
+import BookCard from "../components/BookCard";
+import BookForm from "../components/BookForm";
+import PageNavigator from "../components/PageNavigator";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function AddBooksScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
   const [books, setBooks] = useState<any[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBookId, setEditingBookId] = useState<string | null>(null);
@@ -27,8 +33,17 @@ export default function AddBooksScreen() {
     availableCopies: "",
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 14;
+
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const paginatedBooks = books.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   useEffect(() => {
-    const checkRole = async () => {
+    const checkAuth = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
         const res = await axios.get(`${API_URL}/users/me`, {
@@ -36,7 +51,6 @@ export default function AddBooksScreen() {
         });
 
         const user = res.data.user;
-
         if (user.role !== "admin") {
           Alert.alert("🚫 คุณไม่มีสิทธิ์เข้าถึงหน้านี้");
           router.replace("/");
@@ -45,23 +59,19 @@ export default function AddBooksScreen() {
           await fetchBooks();
           setLoading(false);
         }
-      } catch (error) {
-        Alert.alert("กรุณาเข้าสู่ระบบอีกครั้ง");
+      } catch {
+        Alert.alert("กรุณาเข้าสู่ระบบใหม่");
         router.replace("/(auth)/login");
       }
     };
 
-    checkRole();
+    checkAuth();
   }, []);
 
   const fetchBooks = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/books/getAllBooks`);
-      const sortedBooks = res.data.sort((a: any, b: any) => a.title.localeCompare(b.title));
-      setBooks(sortedBooks);
-    } catch (error) {
-      alert("❌ โหลดหนังสือไม่สำเร็จ");
-    }
+    const res = await axios.get(`${API_URL}/books/getAllBooks`);
+    const sorted = res.data.sort((a: any, b: any) => a.title.localeCompare(b.title));
+    setBooks(sorted);
   };
 
   const handleChange = (key: string, value: string) => {
@@ -79,7 +89,6 @@ export default function AddBooksScreen() {
 
   const handleSaveBook = async () => {
     const { title, author, category, totalCopies, availableCopies } = form;
-
     if (!title || !author || !category) {
       Alert.alert("⚠️ กรุณากรอกข้อมูลให้ครบ");
       return;
@@ -87,7 +96,6 @@ export default function AddBooksScreen() {
 
     try {
       const token = await AsyncStorage.getItem("token");
-
       if (isEditMode && editingBookId) {
         await axios.put(
           `${API_URL}/books/editBooks/${editingBookId}`,
@@ -100,7 +108,7 @@ export default function AddBooksScreen() {
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        Alert.alert("✅ แก้ไขหนังสือสำเร็จ");
+        Alert.alert("✅ แก้ไขสำเร็จ");
       } else {
         await axios.post(
           `${API_URL}/books/create`,
@@ -114,9 +122,8 @@ export default function AddBooksScreen() {
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        Alert.alert("✅ เพิ่มหนังสือสำเร็จ");
+        Alert.alert("✅ เพิ่มสำเร็จ");
       }
-
       resetForm();
       fetchBooks();
     } catch (error: any) {
@@ -138,7 +145,7 @@ export default function AddBooksScreen() {
   };
 
   const handleDelete = async (id: string) => {
-    Alert.alert("ยืนยัน", "คุณต้องการลบหนังสือใช่หรือไม่?", [
+    Alert.alert("ยืนยัน", "ต้องการลบหนังสือใช่ไหม?", [
       { text: "ยกเลิก" },
       {
         text: "ลบ",
@@ -149,8 +156,8 @@ export default function AddBooksScreen() {
               headers: { Authorization: `Bearer ${token}` },
             });
             fetchBooks();
-            Alert.alert("✅ ลบหนังสือแล้ว");
-          } catch (err) {
+            Alert.alert("✅ ลบแล้ว");
+          } catch {
             Alert.alert("❌ ลบไม่สำเร็จ");
           }
         },
@@ -167,53 +174,27 @@ export default function AddBooksScreen() {
   }
 
   return (
-    <ScrollView
-      style={{ backgroundColor: "#00FA9A" }}
-      contentContainerStyle={styles.container}
-    >
+    <ScrollView style={{ backgroundColor: "#00FA9A" }} contentContainerStyle={styles.container}>
       <Text style={styles.header}>📚 เพิ่มหนังสือใหม่</Text>
 
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
           setIsEditMode(false);
-          setEditingBookId(null);
+          setForm({ title: "", author: "", category: "", totalCopies: "", availableCopies: "" });
           setModalVisible(true);
         }}
       >
         <Text style={styles.buttonText}>➕ สร้างหนังสือใหม่</Text>
       </TouchableOpacity>
 
-      <ScrollView
-        style={{ margin: 15 }}
-        contentContainerStyle={styles.cardContainer}
-      >
-        {books.map((book, index) => (
-          <View key={book.id} style={styles.card}>
-            <Text>
-              <Text style={styles.bookIndex}>📌 ลำดับ : {index + 1} </Text>
-            </Text>
-
-            <Text>
-              <Text style={styles.bookTitle}>📖 ชื่อหนังสือ :  </Text>
-              {book.title}
-            </Text>
-
-            <Text style={styles.bookText}>
-              <Text style={styles.bold}>ผู้สร้างหนังสือ : </Text>
-              <Text> <Text>  {book.createdBy?.username || "-"}
-              </Text>
-              </Text>
-
-            </Text>
-            <Text style={styles.bookText}>
-              <Text style={styles.bold}>ผู้แก้ไขหนังสือ : </Text> <Text>
-                <Text>  {book.updatedBy?.username || "-"} </Text>
-              </Text>
-            </Text>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: "#D2691E" }]}
-              onPress={() => {
+      <View style={styles.cardContainer}>
+        {paginatedBooks.map((book, index) => (
+          <View key={book.id} style={styles.cardWrapper}>
+            <BookCard
+              book={book}
+              index={(currentPage - 1) * itemsPerPage + index}
+              onEdit={() => {
                 setForm({
                   title: book.title,
                   author: book.author,
@@ -221,83 +202,43 @@ export default function AddBooksScreen() {
                   totalCopies: book.totalCopies.toString(),
                   availableCopies: book.availableCopies.toString(),
                 });
-                setIsEditMode(true);
                 setEditingBookId(book.id);
+                setIsEditMode(true);
                 setModalVisible(true);
               }}
-            >
-              <Text style={styles.actionText}>✏️ แก้ไขหนังสือ</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: "#0000FF" }]}
-              onPress={() => handleDelete(book.id)}
-            >
-              <Text style={styles.actionText}>🗑️ ลบหนังสือ</Text>
-            </TouchableOpacity>
+              onDelete={() => handleDelete(book.id)}
+            />
           </View>
         ))}
-      </ScrollView>
+      </View>
 
-      {/* Modal */}
+      <PageNavigator
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+        onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      />
+
       <Modal visible={modalVisible} animationType="slide">
-        <ScrollView
-          style={{ height: 350 , backgroundColor: "#00FA9A" }}
-          contentContainerStyle={styles.modalContainer}
-        >
+        <ScrollView contentContainerStyle={styles.modalContainer}>
           <Text style={styles.header}>
             {isEditMode ? "✏️ แก้ไขหนังสือ" : "📖 เพิ่มหนังสือ"}
           </Text>
-
-          {["title", "author", "category", "totalCopies"]
-            .concat(isEditMode ? ["availableCopies"] : [])
-            .map((key) => (
-              <View key={key}>
-                <Text style={styles.label}>{getLabel(key)}</Text>
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    style={styles.input}
-                    value={form[key as keyof typeof form]}
-                    onChangeText={(text) => handleChange(key, text)}
-                    keyboardType={
-                      key === "totalCopies" || key === "availableCopies"
-                        ? "numeric"
-                        : "default"
-                    }
-                  />
-                </View>
-              </View>
-            ))}
-
-          <TouchableOpacity style={styles.button} onPress={handleSaveBook}>
-            <Text style={styles.buttonText}>💾 บันทึก</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#6c757d" }]}
-            onPress={resetForm}
-          >
-            <Text style={styles.buttonText}>❌ ยกเลิก</Text>
-          </TouchableOpacity>
+          <BookForm
+            form={form}
+            isEditMode={isEditMode}
+            onChange={handleChange}
+            onSubmit={handleSaveBook}
+            onCancel={resetForm}
+          />
         </ScrollView>
       </Modal>
     </ScrollView>
   );
 }
 
-const getLabel = (key: string) => {
-  switch (key) {
-    case "title": return "ชื่อหนังสือ";
-    case "author": return "ผู้แต่ง";
-    case "category": return "หมวดหมู่";
-    case "totalCopies": return "จำนวนทั้งหมด";
-    case "availableCopies": return "จำนวนที่สามารถยืมได้";
-    default: return key;
-  }
-};
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 10,
     backgroundColor: "#00FA9A",
   },
@@ -305,38 +246,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#00FA9A",
   },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     borderRadius: 20,
-    width: "100%",
     padding: 10,
-    marginBottom: 5,
+    marginBottom: 10,
     textAlign: "center",
     backgroundColor: "#fff",
   },
-  label: {
-    fontSize: 16,
-    marginTop: 15,
-  },
-  inputContainer: {
-    backgroundColor: "#fff",  // White background for input
-    borderWidth: 1,
-    borderColor: "#000000",
-    borderRadius: 25,
-    padding: 10,
-  },
-  input: {
-    fontSize: 16,
-    backgroundColor: "#fff",  // Ensure the input background is white
-  },
   button: {
     backgroundColor: "#DC143C",
-    padding: 10,
-    margin: 5,
-    marginBottom: 5,
+    padding: 12,
+    marginVertical: 10,
     borderRadius: 20,
     alignItems: "center",
   },
@@ -349,55 +272,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginTop: 3,
-    marginBottom: 3,
+    gap: 10,
   },
-  card: {
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 10,
-    width: "100%",  // Card width for 2 items per row
-    marginBottom: 10,
-    elevation: 3,
-  },
-  bookTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  bookIndex: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 5,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bookText: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  actionButton: {
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    borderRadius: 5,
-    marginTop: 5,
-    alignItems: "center",
-  },
-  actionText: {
-    color: "#fff",
-    borderRadius: 20,
-    fontWeight: "bold",
+  cardWrapper: {
+    width: "48%",
+    marginBottom: 12,
   },
   modalContainer: {
-    width: "95%",
-    backgroundColor: "#FFE4B5", // White background for the modal content
-    borderTopLeftRadius: 10,
-    marginLeft: 10,
-    marginRight: 10,
-    flexWrap: "wrap",
-    borderTopRightRadius: 10,
+    padding: 20,
+    backgroundColor: "#FFE4B5",
   },
 });

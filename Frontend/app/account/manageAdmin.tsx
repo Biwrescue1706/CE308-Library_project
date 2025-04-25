@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import AdminMenuButton from "../components/AdminMenuButton";
 
 export default function ManageAdminScreen() {
   const router = useRouter();
@@ -9,40 +10,12 @@ export default function ManageAdminScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>🛠️ ระบบจัดการของแอดมิน</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/manageAdmin/manageusers")}>
-        <Text style={styles.buttonText}>👥 จัดการสมาชิก</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          router.push("/manageAdmin/addBooks")}>
-        <Text
-          style={styles.buttonText}>
-          📚 จัดการหนังสือ
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          router.push("/manageAdmin/allLoans")}>
-        <Text
-          style={styles.buttonText}>📚 ดูรายการการยืมทั้งหมด
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/manageAdmin/activeLoans")}>
-        <Text style={styles.buttonText}>📚 ดูรายการยืมที่ยังไม่คืน</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/manageAdmin/overdueLoans")}>
-        <Text style={styles.buttonText}>📚 ดูรายการยืมที่ค้างคืน </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/manageAdmin/topBorrowed")}>
-        <Text style={styles.buttonText}>📈 หนังสือที่ยืมบ่อย</Text>
-      </TouchableOpacity>
+      <AdminMenuButton label="👥 จัดการสมาชิก" onPress={() => router.push("/manageAdmin/manageusers")} />
+      <AdminMenuButton label="📚 จัดการหนังสือ" onPress={() => router.push("/manageAdmin/addBooks")} />
+      <AdminMenuButton label="📚 ดูรายการการยืมทั้งหมด" onPress={() => router.push("/manageAdmin/allLoans")} />
+      <AdminMenuButton label="📚 ดูรายการยืมที่ยังไม่คืน" onPress={() => router.push("/manageAdmin/activeLoans")} />
+      <AdminMenuButton label="📚 ดูรายการยืมที่ค้างคืน" onPress={() => router.push("/manageAdmin/overdueLoans")} />
+      <AdminMenuButton label="📈 หนังสือที่ยืมบ่อย" onPress={() => router.push("/manageAdmin/topBorrowed")} />
     </ScrollView>
   );
 }
@@ -62,19 +35,6 @@ const styles = StyleSheet.create({
     width: 340,
     borderRadius: 10,
     marginBottom: 50,
-  },
-  button: {
-    backgroundColor: "#007bff",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: 270,
-    height : 54.5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
+    paddingVertical: 10,
   },
 });

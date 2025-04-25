@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  RefreshControl,
-  TextInput,
+  View, Text, FlatList, TouchableOpacity, Alert, StyleSheet, RefreshControl,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import CartItemCard from "../components/CartItemCard";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -128,44 +122,19 @@ export default function CartScreen() {
       contentContainerStyle={styles.container}
       data={items}
       keyExtractor={(item) => item.id}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={fetchCart} />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchCart} />}
       ListHeaderComponent={<Text style={styles.header}>🛒 ตะกร้าหนังสือ</Text>}
       ListEmptyComponent={<Text style={styles.empty}>ไม่มีรายการในตะกร้า</Text>}
       renderItem={({ item }) => (
-        <View style={styles.itemBox}>
-          <Text style={styles.title}>{item.book.title}</Text>
-          <Text>ผู้แต่ง: {item.book.author}</Text>
-          <View style={styles.quantityRow}>
-            <TouchableOpacity
-              onPress={() => handleUpdateQuantity(item.book.id, item.quantity - 1)}
-              style={styles.qtyButton}
-            >
-              <Text style={styles.qtyText}>➖</Text>
-            </TouchableOpacity>
-            <Text style={styles.qtyDisplay}>{item.quantity}</Text>
-            <TouchableOpacity
-              onPress={() => {
-                if (item.quantity < item.book.availableCopies) {
-                  handleUpdateQuantity(item.book.id, item.quantity + 1);
-                } else {
-                  Alert.alert("❌ เกินจำนวนที่มี", `มีหนังสือได้สูงสุด ${item.book.availableCopies} เล่ม`);
-                }
-              }}
-              style={styles.qtyButton}
-            >
-              <Text style={styles.qtyText}>➕</Text>
-            </TouchableOpacity>
-
-          </View>
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => handleRemove(item.book.id)}
-          >
-            <Text style={styles.buttonText}>ลบ</Text>
-          </TouchableOpacity>
-        </View>
+        <CartItemCard
+          title={item.book.title}
+          author={item.book.author}
+          quantity={item.quantity}
+          availableCopies={item.book.availableCopies}
+          onIncrease={() => handleUpdateQuantity(item.book.id, item.quantity + 1)}
+          onDecrease={() => handleUpdateQuantity(item.book.id, item.quantity - 1)}
+          onRemove={() => handleRemove(item.book.id)}
+        />
       )}
       ListFooterComponent={
         items.length > 0 ? (
@@ -201,46 +170,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  itemBox: {
-    backgroundColor: "#fff",
+  borrowButton: {
+    backgroundColor: "#4caf50",
     padding: 15,
     borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  quantityRow: {
-    flexDirection: "row",
-    alignItems: "center",
     marginTop: 10,
-    justifyContent: "center",
-  },
-  qtyButton: {
-    backgroundColor: "#ccc",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginHorizontal: 10,
-  },
-  qtyText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    margin: 5,
-  },
-  qtyDisplay: {
-    fontSize: 16,
-    fontWeight: "bold",
-    minWidth: 30,
-    textAlign: "center",
-  },
-  removeButton: {
-    marginTop: 10,
-    backgroundColor: "#dc3545",
-    padding: 10,
-    borderRadius: 8,
     alignItems: "center",
   },
   clearButton: {
@@ -248,13 +182,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginTop: 20,
-    alignItems: "center",
-  },
-  borrowButton: {
-    backgroundColor: "#4caf50",
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 10,
     alignItems: "center",
   },
   buttonText: {

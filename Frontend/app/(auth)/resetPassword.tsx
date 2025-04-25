@@ -1,9 +1,7 @@
-// 📁 app/(auth)/resetPassword.tsx
 import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Alert,
   StyleSheet,
@@ -11,6 +9,7 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
+import PasswordInput from "./../components/PasswordInput";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -20,6 +19,9 @@ export default function ResetPasswordScreen() {
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleResetPassword = async () => {
     if (!newPassword || !confirmPassword) {
@@ -50,20 +52,20 @@ export default function ResetPasswordScreen() {
       <View style={styles.box}>
         <Text style={styles.header}>🔐 ตั้งรหัสผ่านใหม่</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="รหัสผ่านใหม่"
-          secureTextEntry
+        <PasswordInput
           value={newPassword}
           onChangeText={setNewPassword}
+          placeholder="รหัสผ่านใหม่"
+          showPassword={showNewPassword}
+          toggleShowPassword={() => setShowNewPassword(!showNewPassword)}
         />
 
-        <TextInput
-          style={styles.input}
-          placeholder="ยืนยันรหัสผ่านใหม่"
-          secureTextEntry
+        <PasswordInput
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          placeholder="ยืนยันรหัสผ่านใหม่"
+          showPassword={showConfirmPassword}
+          toggleShowPassword={() => setShowConfirmPassword(!showConfirmPassword)}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
@@ -95,14 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
     marginBottom: 20,
   },
   button: {

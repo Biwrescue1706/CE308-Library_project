@@ -5,6 +5,7 @@ import {
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import UserInfoBox from "../components/UserInfoBox";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -62,35 +63,8 @@ export default function AccountScreen() {
       {users ? (
         <>
           <Text style={styles.header}>👤 บัญชีของฉัน</Text>
-          <View style={styles.userInfoBox}>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                📧 อีเมล : </Text> {users.email}
-            </Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                🆔 รหัสสมาชิก : </Text> {users.memberId}
-            </Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                👤 ชื่อใช้งาน : </Text> {users.username}
-            </Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                👤 ชื่อ ภาษาไทย : </Text> {users.titleTH} {users.firstNameTH} {users.lastNameTH}
-            </Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                👤 ชื่อ ภาษาอังกฤษ : </Text> {users.titleEN} {users.firstNameEN} {users.lastNameEN}
-            </Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                📞 เบอร์โทร : </Text> {users.phone}</Text>
-            <Text style={styles.infoText}>
-              <Text style={styles.bold}>
-                📅 วันสมัครสมาชิก : </Text> {formatThaiDate(users.registrationDate || users.createdAt)}
-            </Text>
-          </View>
+
+          <UserInfoBox user={users} formatThaiDate={formatThaiDate} />
 
           <TouchableOpacity
             style={styles.button}
@@ -140,9 +114,6 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-  bold: {
-    fontWeight: "bold",
-  },
   container: {
     flexGrow: 1,
     alignItems: "center",
@@ -159,11 +130,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     shadowColor: "#000",
     width: "100%",
-    shadowOffset:
-    {
-      width: 0,
-      height: 2
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -184,25 +151,5 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#dc3545",
-  },
-  userInfoBox: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    width: "100%",
-    marginVertical: 20,
-    shadowColor: "#000",
-    shadowOffset:
-    {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  infoText: {
-    fontSize: 13.5,
-    marginBottom: 2,
   },
 });

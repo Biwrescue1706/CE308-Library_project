@@ -1,19 +1,26 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import PasswordInput from "../components/PasswordInput";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 export default function ChangePasswordScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showpassword, setShowPassword] = useState(false);
 
-   const router = useRouter();
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const router = useRouter();
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -39,26 +46,26 @@ export default function ChangePasswordScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>เปลี่ยนรหัสผ่านใหม่</Text>
+        <Text style={styles.label}>🔒 เปลี่ยนรหัสผ่านใหม่</Text>
 
-        <TextInput
-          style={styles.input}
-          secureTextEntry
+        <PasswordInput
           value={newPassword}
           onChangeText={setNewPassword}
           placeholder="กรอกรหัสผ่านใหม่"
+          showPassword={showNewPassword}
+          toggleShowPassword={() => setShowNewPassword(!showNewPassword)}
         />
 
-        <TextInput
-          style={styles.input}
-          secureTextEntry
+        <PasswordInput
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           placeholder="ยืนยันรหัสผ่านใหม่"
+          showPassword={showConfirmPassword}
+          toggleShowPassword={() => setShowConfirmPassword(!showConfirmPassword)}
         />
 
         <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-          <Text style={styles.buttonText}>ยืนยันเปลี่ยนรหัสผ่าน</Text>
+          <Text style={styles.buttonText}>✅ ยืนยันเปลี่ยนรหัสผ่าน</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -74,7 +81,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 18,
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
     fontWeight: "bold",
     textAlign: "center",
@@ -88,14 +95,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 20,
-    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,

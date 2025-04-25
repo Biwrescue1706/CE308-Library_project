@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  View, Text, StyleSheet, Button,
-  Alert, TextInput, TouchableOpacity,
-} from "react-native";
+import { View, Alert, StyleSheet } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import axios from "axios";
 import Constants from "expo-constants";
+import BookInfoCard from "../components/BookInfoCard";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -14,15 +12,13 @@ export default function BookDetailScreen() {
   const router = useRouter();
   const [book, setBook] = useState<any>(null);
   const [quantity, setQuantity] = useState<number>(1);
-  const [borrowedQuantity, setBorrowedQuantity] = useState<number>(1);
 
   useEffect(() => {
     if (!id) return;
     axios
       .get(`${API_URL}/books/getBooks/${id}`, { withCredentials: true })
       .then((res) => setBook(res.data))
-      .catch((err) => {
-        console.error("❌ ไม่พบหนังสือ:", err);
+      .catch(() => {
         Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลหนังสือได้");
       });
   }, [id]);
@@ -38,8 +34,8 @@ export default function BookDetailScreen() {
         Alert.alert("✅ เพิ่มเข้าตะกร้าสำเร็จ");
         router.push("/(tabs)/cart");
       })
-      .catch((err) => {
-        Alert.alert("ไม่สามารถเพิ่มเข้าตะกร้าได้","เนื่องจากคุณได้มีหนังสือเล่มนี้ในตะกร้าแล้ว");
+      .catch(() => {
+        Alert.alert("ไม่สามารถเพิ่มเข้าตะกร้าได้", "คุณมีหนังสือเล่มนี้อยู่ในตะกร้าแล้ว");
       });
   };
 
@@ -49,7 +45,7 @@ export default function BookDetailScreen() {
       return;
     }
 
-    if (borrowedQuantity > book.availableCopies) {
+    if (quantity > book.availableCopies) {
       Alert.alert("❌", "จำนวนที่ต้องการยืมมากกว่าจำนวนที่มี");
       return;
     }
@@ -57,10 +53,11 @@ export default function BookDetailScreen() {
     axios
       .post(
         `${API_URL}/loans/borrow`,
-        { bookId: book.id, borrowedQuantity },
+        { bookId: book.id, borrowedQuantity: quantity },
         { withCredentials: true }
       )
       .then(() => {
+        Alert.alert("✅ ยืมสำเร็จ");
         router.push("/(tabs)/history");
       })
       .catch(() => {
@@ -72,134 +69,26 @@ export default function BookDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>📖 {book.title}</Text>
-        <Text style={styles.detail}><Text style={styles.bold}>ผู้แต่ง : </Text> {book.author}</Text>
-        <Text style={styles.detail}><Text style={styles.bold}>📚 หมวดหมู่ : </Text> {book.category}</Text>
-        <Text style={styles.detail}><Text style={styles.bold}>จำนวนที่เหลือ : </Text>{book.availableCopies}</Text>
-
-        <View style={styles.quantityRow}>
-          <TouchableOpacity
-            onPress={() => setQuantity(Math.max(1, quantity - 1))}
-            style={styles.quantityButton}
-          >
-            <Text style={styles.quantityText}>-</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={quantity.toString()}
-            onChangeText={(text) => {
-              const num = Number(text);
-              if (!isNaN(num)) {
-                if (num > book.availableCopies) {
-                  setQuantity(book.availableCopies);
-                } else if (num < 1) {
-                  setQuantity(1);
-                } else {
-                  setQuantity(num);
-                }
-              }
-            }}
-            keyboardType="numeric"
-          />
-          <TouchableOpacity
-            onPress={() => {
-              if (quantity < book.availableCopies) {
-                setQuantity(quantity + 1);
-              }
-            }}
-            style={styles.quantityButton}
-          >
-            <Text style={styles.quantityText}>+</Text>
-          </TouchableOpacity>
-          <Text> </Text>
-        </View>
-
-        {book.availableCopies > 0 ? (
-          <>
-            <View style={{ height: 15 }} />
-            <Button title="🛒 เพิ่มเข้าตะกร้า" onPress={handleAddToCart} />
-            <View style={{ height: 15 }} />
-            <Button title="📚 ยืมหนังสือ" onPress={handleBorrow} />
-          </>
-        ) : (
-          <Text style={styles.outOfStock}>❌ หนังสือหมดแล้ว</Text>
-        )}
-      </View>
+      <BookInfoCard
+        title={book.title}
+        author={book.author}
+        category={book.category}
+        availableCopies={book.availableCopies}
+        quantity={quantity}
+        setQuantity={setQuantity}
+        onAddToCart={handleAddToCart}
+        onBorrow={handleBorrow}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bold: {
-    fontWeight: "bold",
-  },
   container: {
     padding: 20,
     backgroundColor: "#00FA9A",
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  card: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 16,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  detail: {
-    fontSize: 16,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
-    fontSize: 16,
-    marginHorizontal: 10,
-    minWidth: 60,
-    textAlign: "center",
-    backgroundColor: "#fff",
-  },
-  quantityRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  quantityButton: {
-    backgroundColor: "#ccc",
-    padding: 10,
-    borderRadius: 8,
-  },
-  quantityText: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  maxNote: {
-    textAlign: "center",
-    color: "gray",
-    fontSize: 12,
-    marginBottom: 12,
-  },
-  outOfStock: {
-    textAlign: "center",
-    color: "red",
-    fontSize: 16,
-    marginTop: 10,
-    fontWeight: "bold",
   },
 });

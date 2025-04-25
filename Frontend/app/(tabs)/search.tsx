@@ -7,11 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
-import { useRouter } from "expo-router";
+import SearchResultCard from "../components/SearchResultCard";
+import PageNavigator from "../components/PageNavigator";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -23,14 +23,13 @@ interface Book {
 }
 
 export default function SearchScreen() {
-  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 14;
 
   const fetchBooks = () => {
     setRefreshing(true);
@@ -39,6 +38,7 @@ export default function SearchScreen() {
       .then((res) => {
         setBooks(res.data);
         setFilteredBooks([]);
+        setSearchText(""); // ✅ เคลียร์ช่องค้นหา
         setLoading(false);
         setRefreshing(false);
       })
@@ -55,7 +55,7 @@ export default function SearchScreen() {
 
   const handleSearch = (text: string) => {
     setSearchText(text);
-    setCurrentPage(1); // reset หน้า
+    setCurrentPage(1);
     if (text.trim() === "") {
       setFilteredBooks([]);
     } else {
@@ -99,46 +99,23 @@ export default function SearchScreen() {
             columnWrapperStyle={{ justifyContent: "space-between" }}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchBooks} />}
             renderItem={({ item }) => (
-              <View style={styles.bookItem}>
-                <Text style={styles.bookTitle}>{item.title}</Text>
-                <Text>ผู้แต่ง: {item.author}</Text>
-                <Text>หมวดหมู่: {item.category}</Text>
-                <TouchableOpacity onPress={() => router.push(`/book/${item.id}`)}>
-                  <Text style={styles.button}>🔍 ดูรายละเอียด</Text>
-                </TouchableOpacity>
-              </View>
+              <SearchResultCard
+                id={item.id}
+                title={item.title}
+                author={item.author}
+                category={item.category}
+              />
             )}
             ListEmptyComponent={<Text style={styles.empty}>ไม่พบหนังสือที่ค้นหา</Text>}
           />
 
           {totalPages > 1 && (
-            <View style={styles.paginationContainer}>
-              <TouchableOpacity
-                onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                style={[
-                  styles.pageButton,
-                  currentPage === 1 && styles.pageButtonDisabled,
-                ]}
-              >
-                <Text style={styles.pageText}>⬅️ ก่อนหน้า</Text>
-              </TouchableOpacity>
-
-              <Text style={styles.pageNumber}>
-                หน้า {currentPage} / {totalPages}
-              </Text>
-
-              <TouchableOpacity
-                onPress={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                style={[
-                  styles.pageButton,
-                  currentPage === totalPages && styles.pageButtonDisabled,
-                ]}
-              >
-                <Text style={styles.pageText}>ถัดไป ➡️</Text>
-              </TouchableOpacity>
-            </View>
+            <PageNavigator
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onNext={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            />
           )}
         </>
       )}
@@ -165,49 +142,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 15,
   },
-  bookItem: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-    width: "48%",
-  },
-  bookTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  button: {
-    color: "#007bff",
-    marginTop: 10,
-    fontWeight: "bold",
-  },
   empty: {
     textAlign: "center",
     marginTop: 20,
     fontSize: 16,
-  },
-  paginationContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  pageButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: "#007bff",
-    borderRadius: 8,
-  },
-  pageButtonDisabled: {
-    backgroundColor: "#ccc",
-  },
-  pageText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  pageNumber: {
-    fontSize: 16,
-    fontWeight: "bold",
   },
 });

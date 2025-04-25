@@ -2,19 +2,21 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
-  Modal,
+  ScrollView,
   StyleSheet,
   Alert,
   ActivityIndicator,
   RefreshControl,
+  Modal,
   TextInput,
-  ScrollView,
+  TouchableOpacity,
+  FlatList,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import UserCard from "../components/UserCard";
+import PageNavigator from "../components/PageNavigator";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -28,6 +30,14 @@ export default function ManageUsersScreen() {
   const [newRole, setNewRole] = useState("user");
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 14;
+
+  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const paginatedUsers = users.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchUser = useCallback(() => {
     setLoading(true);
@@ -40,10 +50,7 @@ export default function ManageUsersScreen() {
           fetchUsers();
         }
       })
-      .catch((error) => {
-        console.error("❌ Error fetching user data:", error);
-        router.replace("/");
-      });
+      .catch(() => router.replace("/"));
   }, []);
 
   useEffect(() => {
@@ -56,25 +63,15 @@ export default function ManageUsersScreen() {
       const res = await axios.get(`${API_URL}/users/admin/all-users`, {
         withCredentials: true,
       });
-      const sortedUsers = res.data.sort((a: any, b: any) => a.username.localeCompare(b.username));
-      setUsers(sortedUsers);
+      const sorted = res.data.sort((a: any, b: any) =>
+        a.username.localeCompare(b.username)
+      );
+      setUsers(sorted);
     } catch (err) {
-      console.error("❌ Error fetching users:", err);
+      Alert.alert("โหลดข้อมูลล้มเหลว");
     } finally {
       setRefreshing(false);
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (username: string) => {
-    try {
-      await axios.delete(`${API_URL}/users/delete/${username}`, {
-        withCredentials: true,
-      });
-      setUsers((prev) => prev.filter((u) => u.username !== username));
-    } catch (err) {
-      console.error("❌ Error deleting user:", err);
-      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถลบผู้ใช้งานได้");
     }
   };
 
@@ -86,10 +83,21 @@ export default function ManageUsersScreen() {
     setModalVisible(true);
   };
 
+  const handleDelete = async (username: string) => {
+    try {
+      await axios.delete(`${API_URL}/users/delete/${username}`, {
+        withCredentials: true,
+      });
+      setUsers((prev) => prev.filter((u) => u.username !== username));
+    } catch (err) {
+      Alert.alert("ลบผู้ใช้ล้มเหลว");
+    }
+  };
+
   const handleSave = async () => {
     try {
       if (newRole !== "user" && newRole !== "admin") {
-        Alert.alert("⚠️ Role ต้องเป็น 'user' หรือ 'admin'");
+        Alert.alert("Role ต้องเป็น user หรือ admin");
         return;
       }
 
@@ -108,9 +116,9 @@ export default function ManageUsersScreen() {
       );
 
       setModalVisible(false);
-      Alert.alert("✅ สำเร็จ", "บันทึกข้อมูลเรียบร้อยแล้ว");
+      Alert.alert("อัปเดตสำเร็จ");
     } catch (err) {
-      Alert.alert("❌ เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตข้อมูลได้");
+      Alert.alert("เกิดข้อผิดพลาด", "อัปเดตไม่สำเร็จ");
     }
   };
 
@@ -121,46 +129,35 @@ export default function ManageUsersScreen() {
       {loading ? (
         <ActivityIndicator size="large" color="tomato" />
       ) : (
-        <ScrollView horizontal>
-          <View style={{ minWidth: 500 }}>
-            <View style={styles.tableHeader}>
-              <Text style={styles.cellHeaderSmall}>ลำดับ</Text>
-              <Text style={styles.cellHeaderLarge}>ชื่อผู้ใช้งาน</Text>
-              <Text style={styles.cellHeader}>✏️ แก้ไขสมาชิก</Text>
-              <Text style={styles.cellHeader}>🗑️ ลบสมาชิก</Text>
-            </View>
+        <>
+          <FlatList
+            data={paginatedUsers}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
+            }
+            contentContainerStyle={styles.cardList}
+            renderItem={({ item, index }) => (
+              <UserCard
+                index={(currentPage - 1) * itemsPerPage + index}
+                username={item.username}
+                role={item.role}
+                onEdit={() => handleEdit(item)}
+                onDelete={() => handleDelete(item.username)}
+              />
+            )}
+          />
 
-            <ScrollView
-              style={{ maxHeight: 500 }}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
-              }
-            >
-              {users.map((item, index) => (
-                <View
-                  key={item.id}
-                  style={styles.tableRow}
-                >
-                  <Text style={styles.cellSmall}>{index + 1}</Text>
-                  <Text style={styles.cellLarge}>{item.username}</Text>
-                  <View style={styles.cellButtonWrapper}>
-                    <TouchableOpacity style={styles.buttonSmall} onPress={() => handleEdit(item)}>
-                      <Text style={styles.buttonTextWhite}>✏️ แก้ไขสมาชิก</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.cellButtonWrapper}>
-                    <TouchableOpacity
-                      style={[styles.buttonSmall, styles.deleteButton]}
-                      onPress={() => handleDelete(item.username)}
-                    >
-                      <Text style={styles.buttonTextWhite}>🗑️ ลบ</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        </ScrollView>
+          <PageNavigator
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPrevious={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            onNext={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+          />
+
+        </>
       )}
 
       <Modal visible={modalVisible} animationType="slide" transparent>
@@ -168,15 +165,15 @@ export default function ManageUsersScreen() {
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>แก้ไขผู้ใช้: {editingUser?.username}</Text>
 
-            <Text style={styles.label}>Role</Text>
+            <Text style={styles.label}>บทบาท (Role)</Text>
             <View style={styles.pickerContainer}>
-              {['user', 'admin'].map((role) => (
+              {["user", "admin"].map((role) => (
                 <TouchableOpacity
                   key={role}
                   style={[styles.roleOption, newRole === role && styles.selectedRole]}
                   onPress={() => setNewRole(role)}
                 >
-                  <Text>{role === 'user' ? '👤 user' : '🛡️ admin'}</Text>
+                  <Text>{role === "user" ? "👤 user" : "🛡️ admin"}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -189,7 +186,6 @@ export default function ManageUsersScreen() {
                 onChangeText={setNewPassword}
                 placeholder="กรอกรหัสผ่านใหม่"
                 secureTextEntry={!showPassword}
-                autoCapitalize="none"
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Text style={styles.toggleText}>{showPassword ? "🙈" : "👁️"}</Text>
@@ -217,93 +213,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 50,
     backgroundColor: "#fff",
-    margin: 10,
-    height: 50,
-    width: 300,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 20,
   },
-  tableHeader: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#000",
-
-  },
-  tableRow: {
-    flexDirection: "row",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#000",
-    borderBottomWidth: 1,
-  },
-  cellHeaderSmall: {
-    width: 60,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 8,
-    borderRightWidth: 1,
-    borderColor: "#000",
-  },
-  cellHeaderLarge: {
-    width: 200,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 8,
-    borderRightWidth: 1,
-    borderColor: "#000",
-  },
-  cellHeader: {
-    width: 200,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 8,
-    borderRightWidth: 1,
-    borderColor: "#000",
-  },
-  cellSmall: {
-    width: 60,
-    textAlign: "center",
-    padding: 8,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#000",
-  },
-  cellLarge: {
-    width: 200,
-    textAlign: "center",
-    padding: 8,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#000",
-  },
-  cellButtonWrapper: {
-    width: 200,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#000",
-  },
-  buttonSmall: {
-    backgroundColor: "#007bff",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-  },
-  deleteButton: {
-    backgroundColor: "#dc3545",
-  },
-  buttonTextWhite: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  actionText: {
-    fontSize: 18,
+  cardList: {
+    paddingBottom: 20,
   },
   modalContainer: {
     flex: 1,
@@ -320,12 +239,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 10,
     textAlign: "center",
+    marginBottom: 15,
   },
   label: {
-    fontSize: 14,
     marginTop: 10,
+    fontSize: 14,
   },
   input: {
     backgroundColor: "#f2f2f2",
@@ -336,6 +255,7 @@ const styles = StyleSheet.create({
   passwordRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 5,
   },
   toggleText: {
     marginLeft: 10,
@@ -360,12 +280,11 @@ const styles = StyleSheet.create({
   pickerContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginVertical: 10,
+    marginTop: 10,
   },
   roleOption: {
     padding: 10,
     borderWidth: 1,
-    borderColor: "#999",
     borderRadius: 8,
     backgroundColor: "#fff",
     width: "40%",

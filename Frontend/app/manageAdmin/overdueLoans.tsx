@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
+import OverdueLoanCard from "../components/OverdueLoanCard";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -16,62 +17,29 @@ export default function OverdueLoansScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/users/me`, { withCredentials: true })
-      .then(() => {
-        axios
-          .get(`${API_URL}/loans/overdue`, { withCredentials: true })
-          .then((res) => setLoans(res.data))
-          .catch(() => {});
-      })
-      .catch(() => {
+    const fetchOverdueLoans = async () => {
+      try {
+        await axios.get(`${API_URL}/users/me`, { withCredentials: true });
+        const res = await axios.get(`${API_URL}/loans/overdue`, { withCredentials: true });
+        setLoans(res.data);
+      } catch (err) {
         router.replace("/(auth)/login");
-      });
+      }
+    };
+
+    fetchOverdueLoans();
   }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>⚠️ รายการค้างคืน</Text>
-      {/* Check if loans is empty and display the empty message */}
+
       {loans.length === 0 ? (
-        <Text style={{ textAlign: "center", marginTop: 20 }}>
-          ไม่มีรายการที่ยังไม่คืน
-        </Text>
+        <Text style={styles.empty}>ไม่มีรายการค้างคืน</Text>
       ) : (
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {loans.map((loan, index) => (
-            <View key={loan.id} style={styles.card}>
-              <Text style={styles.titlebold}>รายการยืมที่ {index + 1}</Text>
-              <Text>
-                <Text style={styles.bold}>👤 ผู้ยืม : </Text>{loan.username}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>👤 ชื่อ : </Text>{loan.fullNameTH}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>👤 รหัสสมาชิก : </Text>{loan.memberId}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>📞 เบอร์โทรผู้ยืม : </Text>{loan.phone}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>📕 หนังสือ : </Text>{loan.bookTitle}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>📅 ยืม : </Text>{loan.loanDate}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>📅 ครบกำหนด : </Text>{loan.dueDate}
-              </Text>
-              <Text>
-                <Text style={styles.bold}>📦 จำนวน : </Text>{loan.borrowedQuantity}{" "}
-                <Text style={styles.bold}>เล่ม</Text>
-              </Text>
-              <Text style={{ color: "red" }}>
-                <Text style={styles.bold}>⏱️ เกินกำหนด : </Text>{loan.lateDays}{" "}
-                <Text style={styles.bold}>วัน</Text>
-              </Text>
-            </View>
+            <OverdueLoanCard key={loan.id} loan={loan} index={index} />
           ))}
         </ScrollView>
       )}
@@ -87,7 +55,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
-    backgroundColor: "#00FA9A",
   },
   header: {
     fontSize: 24,
@@ -97,24 +64,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: 325,
     height: 50,
-    marginHorizontal: "auto",
+    alignSelf: "center",
     marginBottom: 10,
     borderRadius: 10,
+    lineHeight: 50,
   },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 10,
-    marginBottom: 12,
-    elevation: 2,
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  titlebold: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 4,
+  empty: {
     textAlign: "center",
+    marginTop: 30,
+    fontSize: 16,
   },
 });

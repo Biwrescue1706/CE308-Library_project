@@ -1,58 +1,23 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Linking,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import ContactItem from "../components/ContactItem";
 
 export default function ContactScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.contactcontainer}>
+      <View style={styles.contactContainer}>
         <Text style={styles.header}>📞 ช่องทางติดต่อ</Text>
 
-        <Text style={styles.label}>📧 อีเมล:</Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL("mailto:bewrockgame1@gmail.com")}
-        >
-          bewrockgame1@gmail.com
-        </Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL("mailto:66110045@dpu.ac.th")}
-        >
-          66110045@dpu.ac.th
-        </Text>
+        <ContactItem label="📧 อีเมล:" value="bewrockgame1@gmail.com" url="mailto:bewrockgame1@gmail.com" />
+        <ContactItem value="66110045@dpu.ac.th" url="mailto:66110045@dpu.ac.th" />
 
-        <Text style={styles.label}>📱 เบอร์โทร:</Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL("tel:0611747731")}
-        >
-          061-174-7731
-        </Text>
+        <ContactItem label="📱 เบอร์โทร:" value="061-174-7731" url="tel:0611747731" />
 
-        <Text style={styles.label}>📘 Facebook:</Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL("https://facebook.com/biwrescue1706")}
-        >
-          facebook.com/biwrescue1706
-        </Text>
+        <ContactItem label="📘 Facebook:" value="facebook.com/biwrescue1706" url="https://facebook.com/biwrescue1706" />
 
-        <Text style={styles.label}>💬 LINE:</Text>
-        <Text
-          style={styles.link}
-          onPress={() => Linking.openURL("https://line.me/ti/p/Fx7FhxeGKe")}
-        >
-          เพิ่มเพื่อนใน LINE
-        </Text>
-        <Text style={styles.plainText}>ID: phuwanatza7</Text>
+        <ContactItem label="💬 LINE:" value="เพิ่มเพื่อนใน LINE" url="https://line.me/ti/p/Fx7FhxeGKe" />
+        <ContactItem value="ID: phuwanatza7" isPlainText />
       </View>
-
     </ScrollView>
   );
 }
@@ -64,31 +29,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#00FA9A",
   },
-  contactcontainer: {
+  contactContainer: {
     alignItems: "center",
     backgroundColor: "#fff",
-  },  
+  },
   header: {
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
     textAlign: "center",
-  },
-  label: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
-  },
-  link: {
-    fontSize: 18,
-    color: "blue",
-    textDecorationLine: "underline",
-    marginTop: 10,
-  },
-  plainText: {
-    fontSize: 18,
-    marginTop: 10,
-    marginBottom: 40,
   },
 });
