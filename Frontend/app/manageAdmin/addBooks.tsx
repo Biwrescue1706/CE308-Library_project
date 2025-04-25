@@ -34,7 +34,7 @@ export default function AddBooksScreen() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 14;
+  const itemsPerPage = 20;
 
   const totalPages = Math.ceil(books.length / itemsPerPage);
   const paginatedBooks = books.slice(

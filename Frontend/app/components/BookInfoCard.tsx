@@ -34,7 +34,7 @@ const BookInfoCard: React.FC<Props> = ({
       <Text style={styles.title}>📖 {title}</Text>
       <Text style={styles.detail}><Text style={styles.bold}>ผู้แต่ง :</Text> {author}</Text>
       <Text style={styles.detail}><Text style={styles.bold}>📚 หมวดหมู่ :</Text> {category}</Text>
-      <Text style={styles.detail}><Text style={styles.bold}>จำนวนที่เหลือ :</Text> {availableCopies}</Text>
+      <Text style={styles.detail}><Text style={styles.bold}>จำนวนที่เหลือ :</Text> {availableCopies} เล่ม</Text>
 
       <View style={styles.quantityRow}>
         <TouchableOpacity

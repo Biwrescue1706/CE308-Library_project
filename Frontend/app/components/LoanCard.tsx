@@ -21,19 +21,6 @@ type Props = {
 export default function LoanCard({ loan, index }: Props) {
   const remaining = loan.borrowedQuantity - loan.returnedQuantity;
 
-  const getReturnStatus = () => {
-    if (!loan.returned) return "⏳ รอการคืนหนังสือ";
-
-    if (!loan.returnDate) return "✅ คืนหนังสือครบแล้ว";
-
-    const due = new Date(loan.dueDate);
-    const ret = new Date(loan.returnDate);
-
-    return ret <= due
-      ? "✅ คืนหนังสือครบแล้ว"
-      : "✅ คืนหนังสือครบแล้วแต่เกินวันครบกำหนด";
-  };
-
   return (
     <View style={styles.card}>
       {index !== undefined && (
@@ -50,7 +37,7 @@ export default function LoanCard({ loan, index }: Props) {
       <Text><Text style={styles.bold}>📅 ครบกำหนด : </Text>{loan.dueDate}</Text>
       <Text>
         <Text style={styles.bold}>✅ คืนสถานะ : </Text>
-        {getReturnStatus()}
+        {loan.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ รอการคืนหนังสือ"}
       </Text>
       <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> {loan.returnDate || "-"} </Text>
     </View>

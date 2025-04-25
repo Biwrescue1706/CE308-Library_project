@@ -26,19 +26,6 @@ const LoanHistoryCard: React.FC<Props> = ({
 }) => {
   const remaining = item.borrowedQuantity - item.returnedQuantity;
 
-  const getReturnStatus = () => {
-    if (!item.returned) return "⏳ รอการคืนหนังสือ";
-
-    if (!item.returnDate) return "✅ คืนหนังสือครบแล้ว";
-
-    const due = new Date(item.dueDate);
-    const ret = new Date(item.returnDate);
-
-    return ret <= due
-      ? "✅ คืนหนังสือครบแล้ว"
-      : "✅ คืนหนังสือครบแล้วแต่เกินวันครบกำหนด";
-  };
-
   return (
     <View style={styles.historyContainer}>
       <Text style={styles.bookTitle}>📖 {item.title}</Text>
@@ -48,16 +35,17 @@ const LoanHistoryCard: React.FC<Props> = ({
       <Text><Text style={styles.bold}>📅 วันที่ยืม : </Text>{item.loanDate}</Text>
       <Text><Text style={styles.bold}>⏳ ครบกำหนด : </Text>{item.dueDate}</Text>
 
-      {item.returned && item.returnDate ? (
-        <Text><Text style={styles.bold}>📅 วันที่คืน : </Text>{item.returnDate}</Text>
-      ) : (
-        <Text><Text style={styles.bold}>📅 วันที่คืน : </Text> ⏳ ยังไม่ได้คืนหนังสือ</Text>
-      )}
+      <Text>
+        <Text style={styles.bold}>📅 วันที่คืน : </Text>
+        {item.returned && item.returnDate
+          ? item.returnDate
+          : "⏳ ยังไม่ได้คืนหนังสือ"}
+      </Text>
 
       <Text style={styles.bold}>
         สถานะการคืน :{" "}
         <Text style={{ color: item.returned ? "green" : "red" }}>
-          {getReturnStatus()}
+          {item.returned ? "✅ คืนหนังสือครบแล้ว" : "⏳ รอการคืนหนังสือ"}
         </Text>
       </Text>
 

@@ -20,10 +20,15 @@ export default function HomeScreen() {
     axios
       .get(`${API_URL}/books/getAllBooks`, { withCredentials: true })
       .then((res) => {
-        const sortedBooks = res.data.sort((a: any, b: any) =>
-          a.title.localeCompare(b.title)
-        );
-        setBooks(sortedBooks);
+        const filteredAndSorted = res.data
+          .filter((book: any) => book.availableCopies > 0)
+          .sort((a: any, b: any) => {
+            const titleCompare = a.title.localeCompare(b.title); // ASC
+            if (titleCompare !== 0) return titleCompare;
+            return a.category.localeCompare(b.category); // ASC
+          });
+  
+        setBooks(filteredAndSorted);
       })
       .catch((error) => console.error(error));
   };
