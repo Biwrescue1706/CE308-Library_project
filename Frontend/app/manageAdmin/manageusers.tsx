@@ -2,21 +2,18 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  ScrollView,
+  TouchableOpacity,
+  Modal,
   StyleSheet,
   Alert,
   ActivityIndicator,
   RefreshControl,
-  Modal,
   TextInput,
-  TouchableOpacity,
   FlatList,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import UserCard from "../components/UserCard";
-import PageNavigator from "../components/PageNavigator";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
@@ -30,14 +27,6 @@ export default function ManageUsersScreen() {
   const [newRole, setNewRole] = useState("user");
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 14;
-
-  const totalPages = Math.ceil(users.length / itemsPerPage);
-  const paginatedUsers = users.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   const fetchUser = useCallback(() => {
     setLoading(true);
@@ -63,15 +52,24 @@ export default function ManageUsersScreen() {
       const res = await axios.get(`${API_URL}/users/admin/all-users`, {
         withCredentials: true,
       });
-      const sorted = res.data.sort((a: any, b: any) =>
-        a.username.localeCompare(b.username)
-      );
-      setUsers(sorted);
+      const sortedUsers = res.data.sort((a: any, b: any) => a.username.localeCompare(b.username));
+      setUsers(sortedUsers);
     } catch (err) {
-      Alert.alert("โหลดข้อมูลล้มเหลว");
+      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถโหลดข้อมูลได้");
     } finally {
       setRefreshing(false);
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (username: string) => {
+    try {
+      await axios.delete(`${API_URL}/users/delete/${username}`, {
+        withCredentials: true,
+      });
+      setUsers((prev) => prev.filter((u) => u.username !== username));
+    } catch (err) {
+      Alert.alert("เกิดข้อผิดพลาด", "ไม่สามารถลบผู้ใช้งานได้");
     }
   };
 
@@ -83,21 +81,10 @@ export default function ManageUsersScreen() {
     setModalVisible(true);
   };
 
-  const handleDelete = async (username: string) => {
-    try {
-      await axios.delete(`${API_URL}/users/delete/${username}`, {
-        withCredentials: true,
-      });
-      setUsers((prev) => prev.filter((u) => u.username !== username));
-    } catch (err) {
-      Alert.alert("ลบผู้ใช้ล้มเหลว");
-    }
-  };
-
   const handleSave = async () => {
     try {
       if (newRole !== "user" && newRole !== "admin") {
-        Alert.alert("Role ต้องเป็น user หรือ admin");
+        Alert.alert("⚠️ Role ต้องเป็น 'user' หรือ 'admin'");
         return;
       }
 
@@ -110,62 +97,59 @@ export default function ManageUsersScreen() {
       });
 
       setUsers((prev) =>
-        prev.map((u) =>
-          u.username === editingUser.username ? { ...u, ...data } : u
-        )
+        prev.map((u) => (u.username === editingUser.username ? { ...u, ...data } : u))
       );
 
       setModalVisible(false);
-      Alert.alert("อัปเดตสำเร็จ");
-    } catch (err) {
-      Alert.alert("เกิดข้อผิดพลาด", "อัปเดตไม่สำเร็จ");
+      Alert.alert("✅ สำเร็จ", "บันทึกข้อมูลเรียบร้อยแล้ว");
+    } catch {
+      Alert.alert("❌ เกิดข้อผิดพลาด", "ไม่สามารถอัปเดตข้อมูลได้");
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="tomato" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>👥 จัดการสมาชิก</Text>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="tomato" />
-      ) : (
-        <>
-          <FlatList
-            data={paginatedUsers}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
-            }
-            contentContainerStyle={styles.cardList}
-            renderItem={({ item, index }) => (
-              <UserCard
-                index={(currentPage - 1) * itemsPerPage + index}
-                username={item.username}
-                role={item.role}
-                onEdit={() => handleEdit(item)}
-                onDelete={() => handleDelete(item.username)}
-              />
-            )}
-          />
+      <FlatList
+        data={users}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 10 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
+        }
+        renderItem={({ item }) => (
+          <View style={styles.userCard}>
+            <Text style={styles.userTitle}>👤 Username: {item.username}</Text>
+            <Text>Role: {item.role}</Text>
+            <View style={styles.cardActions}>
+              <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(item)}>
+                <Text style={styles.buttonTextWhite}>✏️ แก้ไข</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.username)}>
+                <Text style={styles.buttonTextWhite}>🗑️ ลบ</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
 
-          <PageNavigator
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPrevious={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            onNext={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-          />
-
-        </>
-      )}
-
+      {/* Modal แก้ไขผู้ใช้ */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalBox}>
             <Text style={styles.modalTitle}>แก้ไขผู้ใช้: {editingUser?.username}</Text>
 
-            <Text style={styles.label}>บทบาท (Role)</Text>
+            <Text style={styles.label}>Role</Text>
             <View style={styles.pickerContainer}>
               {["user", "admin"].map((role) => (
                 <TouchableOpacity
@@ -186,6 +170,7 @@ export default function ManageUsersScreen() {
                 onChangeText={setNewPassword}
                 placeholder="กรอกรหัสผ่านใหม่"
                 secureTextEntry={!showPassword}
+                autoCapitalize="none"
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 <Text style={styles.toggleText}>{showPassword ? "🙈" : "👁️"}</Text>
@@ -210,19 +195,55 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#00FA9A",
-    padding: 20,
+    padding: 10,
   },
   header: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    backgroundColor: "#fff",
-    padding: 10,
-    borderRadius: 10,
     marginBottom: 20,
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    borderRadius: 10,
   },
-  cardList: {
-    paddingBottom: 20,
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  userCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
+    width: "48%",
+    elevation: 2,
+  },
+  userTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  cardActions: {
+    flexDirection: "column", 
+    alignItems: "center",
+    marginTop: 10,
+  },
+  editButton: {
+    backgroundColor: "#0d6efd",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 6,
+    marginTop: 10, 
+  },
+  buttonTextWhite: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   modalContainer: {
     flex: 1,
@@ -239,12 +260,12 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: "bold",
+    marginBottom: 10,
     textAlign: "center",
-    marginBottom: 15,
   },
   label: {
-    marginTop: 10,
     fontSize: 14,
+    marginTop: 10,
   },
   input: {
     backgroundColor: "#f2f2f2",
@@ -255,7 +276,6 @@ const styles = StyleSheet.create({
   passwordRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 5,
   },
   toggleText: {
     marginLeft: 10,
@@ -280,14 +300,15 @@ const styles = StyleSheet.create({
   pickerContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginTop: 10,
+    marginVertical: 10,
   },
   roleOption: {
     padding: 10,
     borderWidth: 1,
+    borderColor: "#999",
     borderRadius: 8,
     backgroundColor: "#fff",
-    width: "40%",
+    width: "48%",
     alignItems: "center",
   },
   selectedRole: {

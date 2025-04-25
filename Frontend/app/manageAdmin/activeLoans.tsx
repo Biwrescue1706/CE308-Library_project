@@ -40,7 +40,7 @@ export default function OverdueLoansScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>📚 รายการยืมที่ค้างคืน</Text>
+      <Text style={styles.header}>📚 รายการยืมที่ยังไม่คืน</Text>
       {loading ? (
         <ActivityIndicator size="large" color="tomato" />
       ) : (
