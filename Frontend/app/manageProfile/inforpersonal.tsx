@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
-  Alert, ScrollView, Platform, Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Platform,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -10,19 +18,8 @@ import { useRouter } from "expo-router";
 
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-const titleTH = [
-  "นาย", "นาง", "นางสาว", "ด.ช.", "ด.ญ.",
-  "ดร.", "ผศ.", "รศ.", "ศ.", "ศาสตราจารย์เกียรติคุณ",
-  "ผศ.ดร.", "รศ.ดร.", "ศ.ดร.", "ศาสตราจารย์เกียรติคุณ ดร.",
-  "ว่าที่ ร.ต.", "ว่าที่ ร.ต.ดร.", "ว่าที่ ร.ต. หญิง", "ว่าที่ ร.ต.ดร.หญิง",
-];
-
-const titleEN = [
-  "Mr.", "Mrs.", "Miss", "Master", "Miss (Child)",
-  "Dr.", "Asst. Prof.", "Assoc. Prof.", "Prof.", "Professor Emeritus",
-  "Asst. Prof. Dr.", "Assoc. Prof. Dr.", "Prof. Dr.", "Professor Emeritus Dr.",
-  "Acting Sub Lt.", "Acting Sub Lt. Dr.", "Acting Sub Lt. (Female)", "Acting Sub Lt. Dr. (Female)",
-];
+const titleTH = ["นาย", "นาง", "นางสาว"];
+const titleEN = ["Mr.", "Mrs.", "Miss"];
 
 export default function Inforpersonal() {
   const [user, setUser] = useState<any>(null);
@@ -53,23 +50,20 @@ export default function Inforpersonal() {
   };
 
   const handleSelectTitleTH = (selectedTitleTH: string) => {
-    const index = titleTH.indexOf(selectedTitleTH);
     updateUser("titleTH", selectedTitleTH);
     setShowTitleTHModal(false);
   };
 
   const handleSelectTitleEN = (selectedTitleEN: string) => {
-    const index = titleEN.indexOf(selectedTitleEN);
     updateUser("titleEN", selectedTitleEN);
-    setShowTitleTHModal(false);
+    setShowTitleENModal(false);
   };
-
 
   const formatThaiDate = (dateString: string) => {
     const date = new Date(dateString);
     const thaiMonths = [
       "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
-      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
     ];
     const day = date.getDate().toString().padStart(2, "0");
     const month = thaiMonths[date.getMonth()];
@@ -107,60 +101,54 @@ export default function Inforpersonal() {
       <View style={styles.formBox}>
         <Text style={styles.header}>📋 ข้อมูลส่วนตัว</Text>
 
-        <Text style={styles.label}>คำนำหน้า (ภาษาไทย) : </Text>
-        <TouchableOpacity
-          style={styles.input}
-          onPress={() =>
-            setShowTitleTHModal(true)}>
+        <Text style={styles.label}>คำนำหน้า (ภาษาไทย) :</Text>
+        <TouchableOpacity style={styles.input} onPress={() => setShowTitleTHModal(true)}>
           <Text>{user?.titleTH || "เลือกคำนำหน้า (ไทย)"}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.label}>ชื่อ (ภาษาไทย) : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>ชื่อ (ภาษาไทย) :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.firstNameTH}
-          onChangeText={(text) =>
-            updateUser("firstNameTH", text)}
+          onChangeText={(text) => updateUser("firstNameTH", text)}
         />
 
-        <Text style={styles.label}>นามสกุล (ภาษาไทย) : </Text>
-        <TextInput style={styles.input}
-          value={user?.lastNameTH}
-          onChangeText={(text) =>
-            updateUser("lastNameTH", text)}
-        />
-        <Text style={styles.label}>คำนำหน้า (ภาษาอังกฤษ) : </Text>
-        <TouchableOpacity
+        <Text style={styles.label}>นามสกุล (ภาษาไทย) :</Text>
+        <TextInput
           style={styles.input}
-          onPress={() => setShowTitleENModal(true)}
-        >
+          value={user?.lastNameTH}
+          onChangeText={(text) => updateUser("lastNameTH", text)}
+        />
+
+        <Text style={styles.label}>คำนำหน้า (ภาษาอังกฤษ) :</Text>
+        <TouchableOpacity style={styles.input} onPress={() => setShowTitleENModal(true)}>
           <Text>{user?.titleEN || "เลือกคำนำหน้า (อังกฤษ)"}</Text>
         </TouchableOpacity>
 
-
-        <Text style={styles.label}>ชื่อ (ภาษาอังกฤษ) : </Text>
-        <TextInput style={styles.input}
-          value={user?.firstNameEN}
-          onChangeText={(text) =>
-            updateUser("firstNameEN", text)} />
-
-        <Text style={styles.label}>นามสกุล (ภาษาอังกฤษ) : </Text>
-        <TextInput style={styles.input}
-          value={user?.lastNameEN}
-          onChangeText={(text) =>
-            updateUser("lastNameEN", text)} />
-
-        <Text style={styles.label}>เบอร์โทร : </Text>
-        <TextInput style={styles.input}
-          value={user?.phone}
-          onChangeText={(text) =>
-            updateUser("phone", text)}
-          keyboardType="phone-pad" />
-
-        <Text style={styles.label}>วันเกิด : </Text>
-        <TouchableOpacity
+        <Text style={styles.label}>ชื่อ (ภาษาอังกฤษ) :</Text>
+        <TextInput
           style={styles.input}
-          onPress={() =>
-            setShowDatePicker(true)}>
+          value={user?.firstNameEN}
+          onChangeText={(text) => updateUser("firstNameEN", text)}
+        />
+
+        <Text style={styles.label}>นามสกุล (ภาษาอังกฤษ) :</Text>
+        <TextInput
+          style={styles.input}
+          value={user?.lastNameEN}
+          onChangeText={(text) => updateUser("lastNameEN", text)}
+        />
+
+        <Text style={styles.label}>เบอร์โทร :</Text>
+        <TextInput
+          style={styles.input}
+          value={user?.phone}
+          onChangeText={(text) => updateUser("phone", text)}
+          keyboardType="phone-pad"
+        />
+
+        <Text style={styles.label}>วันเกิด :</Text>
+        <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
           <Text>{formatThaiDate(user?.birthDate)}</Text>
         </TouchableOpacity>
 
@@ -178,50 +166,62 @@ export default function Inforpersonal() {
           />
         )}
 
-        <Text style={styles.label}>บ้านเลขที่ : </Text>
-        <TextInput style={styles.input} value={user?.houseNumber} onChangeText={(text) => updateUser("houseNumber", text)} />
+        <Text style={styles.label}>บ้านเลขที่ :</Text>
+        <TextInput
+          style={styles.input}
+          value={user?.houseNumber}
+          onChangeText={(text) => updateUser("houseNumber", text)}
+        />
 
-        <Text style={styles.label}>หมู่ที่ : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>หมู่ที่ :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.villageNo}
-          onChangeText={(text) =>
-            updateUser("villageNo", text)} />
+          onChangeText={(text) => updateUser("villageNo", text)}
+        />
 
-        <Text style={styles.label}>ซอย : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>ซอย :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.alley}
-          onChangeText={(text) =>
-            updateUser("alley", text)} />
+          onChangeText={(text) => updateUser("alley", text)}
+        />
 
-        <Text style={styles.label}>ถนน : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>ถนน :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.street}
-          onChangeText={(text) =>
-            updateUser("street", text)} />
+          onChangeText={(text) => updateUser("street", text)}
+        />
 
-        <Text style={styles.label}>ตำบล/แขวง : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>ตำบล/แขวง :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.subdistrict}
-          onChangeText={(text) =>
-            updateUser("subdistrict", text)} />
+          onChangeText={(text) => updateUser("subdistrict", text)}
+        />
 
-        <Text style={styles.label}>อำเภอ/เขต : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>อำเภอ/เขต :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.district}
-          onChangeText={(text) =>
-            updateUser("district", text)} />
+          onChangeText={(text) => updateUser("district", text)}
+        />
 
-        <Text style={styles.label}>จังหวัด : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>จังหวัด :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.province}
-          onChangeText={(text) =>
-            updateUser("province", text)} />
+          onChangeText={(text) => updateUser("province", text)}
+        />
 
-        <Text style={styles.label}>รหัสไปรษณีย์ : </Text>
-        <TextInput style={styles.input}
+        <Text style={styles.label}>รหัสไปรษณีย์ :</Text>
+        <TextInput
+          style={styles.input}
           value={user?.postalCode}
-          onChangeText={(text) =>
-            updateUser("postalCode", text)} keyboardType="numeric" />
+          onChangeText={(text) => updateUser("postalCode", text)}
+          keyboardType="numeric"
+        />
 
         <TouchableOpacity style={styles.button} onPress={handleSave} disabled={saving}>
           <Text style={styles.buttonText}>
@@ -230,40 +230,68 @@ export default function Inforpersonal() {
         </TouchableOpacity>
       </View>
 
-      <Modal visible={showTitleTHModal} animationType="slide">
-        <ScrollView contentContainerStyle={styles.modalContainer}>
-          <Text style={styles.modalTitle}>เลือกคำนำหน้า (ภาษาไทย)</Text>
-          {titleTH.map((title) => (
-            <TouchableOpacity
-              key={title}
-              style={styles.modalItem}
-              onPress={() => handleSelectTitleTH(title)}
-            >
-              <Text>{title}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity onPress={() => setShowTitleTHModal(false)}>
-            <Text style={styles.modalClose}>ปิด</Text>
-          </TouchableOpacity>
-        </ScrollView>
+      {/* Modal ภาษาไทย */}
+      <Modal
+        visible={showTitleTHModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTitleTHModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setShowTitleTHModal(false)}
+        >
+          <View style={styles.bottomSheet}>
+            <ScrollView contentContainerStyle={styles.modalContainer}>
+              <Text style={styles.modalTitle}>เลือกคำนำหน้า (ภาษาไทย)</Text>
+              {titleTH.map((title) => (
+                <TouchableOpacity
+                  key={title}
+                  style={styles.modalItem}
+                  onPress={() => handleSelectTitleTH(title)}
+                >
+                  <Text>{title}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity onPress={() => setShowTitleTHModal(false)}>
+                <Text style={styles.modalClose}>ปิด</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
       </Modal>
 
-      <Modal visible={showTitleENModal} animationType="slide">
-        <ScrollView contentContainerStyle={styles.modalContainer}>
-          <Text style={styles.modalTitle}>เลือกคำนำหน้า (ภาษาอังกฤษ)</Text>
-          {titleEN.map((title) => ( // ✅ ต้องเป็น titleEN
-            <TouchableOpacity
-              key={title}
-              style={styles.modalItem}
-              onPress={() => handleSelectTitleEN(title)}
-            >
-              <Text>{title}</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity onPress={() => setShowTitleENModal(false)}> {/* ✅ ปิด EN ให้ถูก */}
-            <Text style={styles.modalClose}>ปิด</Text>
-          </TouchableOpacity>
-        </ScrollView>
+      {/* Modal ภาษาอังกฤษ */}
+      <Modal
+        visible={showTitleENModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTitleENModal(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setShowTitleENModal(false)}
+        >
+          <View style={styles.bottomSheet}>
+            <ScrollView contentContainerStyle={styles.modalContainer}>
+              <Text style={styles.modalTitle}>เลือกคำนำหน้า (ภาษาอังกฤษ)</Text>
+              {titleEN.map((title) => (
+                <TouchableOpacity
+                  key={title}
+                  style={styles.modalItem}
+                  onPress={() => handleSelectTitleEN(title)}
+                >
+                  <Text>{title}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity onPress={() => setShowTitleENModal(false)}>
+                <Text style={styles.modalClose}>ปิด</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
       </Modal>
     </ScrollView>
   );
@@ -286,7 +314,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#000000",
+    borderColor: "#000",
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
@@ -294,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   formBox: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     shadowColor: "#000",
@@ -315,9 +343,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  modalContainer: {
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  bottomSheet: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 20,
-    backgroundColor: "#ffffff",
+    maxHeight: "60%",
+  },
+  modalContainer: {
+    paddingBottom: 20,
   },
   modalTitle: {
     fontSize: 18,
@@ -329,7 +368,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    backgroundColor: "#ffffff",
   },
   modalClose: {
     color: "red",
