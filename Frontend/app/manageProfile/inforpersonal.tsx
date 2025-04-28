@@ -15,49 +15,13 @@ const titleTH = [
   "ดร.", "ผศ.", "รศ.", "ศ.", "ศาสตราจารย์เกียรติคุณ",
   "ผศ.ดร.", "รศ.ดร.", "ศ.ดร.", "ศาสตราจารย์เกียรติคุณ ดร.",
   "ว่าที่ ร.ต.", "ว่าที่ ร.ต.ดร.", "ว่าที่ ร.ต. หญิง", "ว่าที่ ร.ต.ดร.หญิง",
-  "พล.ต.อ.", "พล.ต.ท.", "พล.ต.ต.",
-  "พ.ต.อ.", "พ.ต.ท.", "พ.ต.ต.",
-  "ร.ต.อ.", "ร.ต.ท.", "ร.ต.ต.",
-  "ว่าที่ ร.ต.ต.",
-  "ด.ต.", "ส.ต.อ.", "ส.ต.ท.", "ส.ต.ต.",
-  "พล.ต.อ.หญิง", "พล.ต.ท.หญิง", "พล.ต.ต.หญิง",
-  "พ.ต.อ.หญิง", "พ.ต.ท.หญิง", "พ.ต.ต.หญิง",
-  "ร.ต.อ.หญิง", "ร.ต.ท.หญิง", "ร.ต.ต.หญิง",
-  "ว่าที่ ร.ต.ต.หญิง",
-  "ด.ต.หญิง", "ส.ต.อ.หญิง", "ส.ต.ท.หญิง", "ส.ต.ต.หญิง",
-  "พล.ต.", "พ.อ.", "พ.ท.", "พ.ต.",
-  "ร.อ.", "ร.ท.", "ร.ต.",
-  "ส.อ.", "ส.ท.", "ส.ต.",
-  "พลฯ",
-  "พล.ต.หญิง", "พ.อ.หญิง", "พ.ท.หญิง", "พ.ต.หญิง",
-  "ร.อ.หญิง", "ร.ท.หญิง", "ร.ต.หญิง",
-  "ส.อ.หญิง", "ส.ท.หญิง", "ส.ต.หญิง",
-  "พลฯหญิง"
 ];
 
 const titleEN = [
-  "Mr.", "Mrs.", "Miss", "Master", "Miss",
+  "Mr.", "Mrs.", "Miss", "Master", "Miss (Child)",
   "Dr.", "Asst. Prof.", "Assoc. Prof.", "Prof.", "Professor Emeritus",
   "Asst. Prof. Dr.", "Assoc. Prof. Dr.", "Prof. Dr.", "Professor Emeritus Dr.",
   "Acting Sub Lt.", "Acting Sub Lt. Dr.", "Acting Sub Lt. (Female)", "Acting Sub Lt. Dr. (Female)",
-  "Pol. Gen.", "Pol. Lt. Gen.", "Pol. Maj. Gen.",
-  "Pol. Col.", "Pol. Lt. Col.", "Pol. Maj.",
-  "Pol. Capt.", "Pol. Lt.", "Pol. Sub Lt.",
-  "Acting Pol. Sub Lt.",
-  "Pol. Sen. Sgt. Maj.", "Pol. Sgt. Maj.", "Pol. Sgt. 1st Class", "Pol. Sgt. 2nd Class",
-  "Pol. Gen. (Female)", "Pol. Lt. Gen. (Female)", "Pol. Maj. Gen. (Female)",
-  "Pol. Col. (Female)", "Pol. Lt. Col. (Female)", "Pol. Maj. (Female)",
-  "Pol. Capt. (Female)", "Pol. Lt. (Female)", "Pol. Sub Lt. (Female)",
-  "Acting Pol. Sub Lt. (Female)",
-  "Pol. Sen. Sgt. Maj. (Female)", "Pol. Sgt. Maj. (Female)", "Pol. Sgt. 1st Class (Female)", "Pol. Sgt. 2nd Class (Female)",
-  "Maj. Gen.", "Col.", "Lt. Col.", "Maj.",
-  "Capt.", "1st Lt.", "2nd Lt.",
-  "Sgt. Maj.", "Sgt. 1st Class", "Sgt. 2nd Class",
-  "Private",
-  "Maj. Gen. (Female)", "Col. (Female)", "Lt. Col. (Female)", "Maj. (Female)",
-  "Capt. (Female)", "1st Lt. (Female)", "2nd Lt. (Female)",
-  "Sgt. Maj. (Female)", "Sgt. 1st Class (Female)", "Sgt. 2nd Class (Female)",
-  "Private (Female)"
 ];
 
 export default function Inforpersonal() {
@@ -66,6 +30,7 @@ export default function Inforpersonal() {
   const [saving, setSaving] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTitleTHModal, setShowTitleTHModal] = useState(false);
+  const [showTitleENModal, setShowTitleENModal] = useState(false);
 
   const router = useRouter();
 
@@ -89,9 +54,13 @@ export default function Inforpersonal() {
 
   const handleSelectTitleTH = (selectedTitleTH: string) => {
     const index = titleTH.indexOf(selectedTitleTH);
-    const matchedEN = titleEN[index] || "";
     updateUser("titleTH", selectedTitleTH);
-    updateUser("titleEN", matchedEN);
+    setShowTitleTHModal(false);
+  };
+
+  const handleSelectTitleEN = (selectedTitleEN: string) => {
+    const index = titleEN.indexOf(selectedTitleEN);
+    updateUser("titleEN", selectedTitleEN);
     setShowTitleTHModal(false);
   };
 
@@ -162,6 +131,7 @@ export default function Inforpersonal() {
         <Text style={styles.label}>คำนำหน้า (ภาษาอังกฤษ) : </Text>
         <TouchableOpacity
           style={styles.input}
+          onPress={() => setShowTitleENModal(true)}
         >
           <Text>{user?.titleEN || "เลือกคำนำหน้า (อังกฤษ)"}</Text>
         </TouchableOpacity>
@@ -267,14 +237,30 @@ export default function Inforpersonal() {
             <TouchableOpacity
               key={title}
               style={styles.modalItem}
-              onPress={() =>
-                handleSelectTitleTH(title)}>
+              onPress={() => handleSelectTitleTH(title)}
+            >
               <Text>{title}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity
-            onPress={() =>
-              setShowTitleTHModal(false)}>
+          <TouchableOpacity onPress={() => setShowTitleTHModal(false)}>
+            <Text style={styles.modalClose}>ปิด</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </Modal>
+
+      <Modal visible={showTitleENModal} animationType="slide">
+        <ScrollView contentContainerStyle={styles.modalContainer}>
+          <Text style={styles.modalTitle}>เลือกคำนำหน้า (ภาษาอังกฤษ)</Text>
+          {titleEN.map((title) => ( // ✅ ต้องเป็น titleEN
+            <TouchableOpacity
+              key={title}
+              style={styles.modalItem}
+              onPress={() => handleSelectTitleEN(title)}
+            >
+              <Text>{title}</Text>
+            </TouchableOpacity>
+          ))}
+          <TouchableOpacity onPress={() => setShowTitleENModal(false)}> {/* ✅ ปิด EN ให้ถูก */}
             <Text style={styles.modalClose}>ปิด</Text>
           </TouchableOpacity>
         </ScrollView>
